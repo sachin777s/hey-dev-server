@@ -20,7 +20,7 @@ const communitySchema = new Schema(
       required: true,
       maxlength: 500,
     },
-    avatar: {
+    logo: {
       type: String,
       default: null,
     },

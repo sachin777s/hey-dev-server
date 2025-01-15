@@ -1,15 +1,17 @@
 import { Schema, model } from "mongoose";
 
-const tweetSchema = new Schema(
+const postSchema = new Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+    heading: {
+      type: String,
+    },
     text: {
       type: String,
-      required: true,
     },
     media: {
       type: {
@@ -20,14 +22,14 @@ const tweetSchema = new Schema(
         type: String,
       },
     },
-    parentTweetId: {
+    parentPostId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Tweet",
+      ref: "Post",
       default: null,
     },
-    rootTweetId: {
+    rootPostId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Tweet",
+      ref: "Post",
       default: null,
     },
     likes: [
@@ -53,5 +55,5 @@ const tweetSchema = new Schema(
   { timestamps: true }
 );
 
-const Tweet = model("Tweet", tweetSchema);
-export default Tweet;
+const Post = model("Post", postSchema);
+export default Post;

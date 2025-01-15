@@ -10,6 +10,7 @@ import {
   USERNAME_REGEX,
   VALIDATION_MESSAGES,
 } from "./user.constants.js";
+import { experienceSchema } from "./sub-schemas/experience.schema.js";
 
 // Main User schema
 const userSchema = new Schema(
@@ -37,7 +38,6 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
       minlength: [8, "Password must be at least 8 characters"],
       maxlength: [40, "Password cannot exceed 40 characters"],
       match: [PASSWORD_REGEX, VALIDATION_MESSAGES.PASSWORD],
@@ -82,6 +82,10 @@ const userSchema = new Schema(
     },
     education: {
       type: [educationSchema],
+      default: [],
+    },
+    experience: {
+      type: [experienceSchema],
       default: [],
     },
     spokenLanguages: {

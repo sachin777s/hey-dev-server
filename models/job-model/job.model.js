@@ -29,6 +29,7 @@ const jobSchema = new Schema(
     locationType: {
       type: String,
       enum: ["Office", "Remote", "Hybrid"],
+      required: true,
     },
     location: {
       type: "String",
