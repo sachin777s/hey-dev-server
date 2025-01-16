@@ -1,3 +1,4 @@
+import { Schema } from "mongoose";
 import { URL_REGEX, VALIDATION_MESSAGES } from "../user.constants.js";
 
 export const socialLinksSchema = new Schema(

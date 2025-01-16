@@ -5,6 +5,7 @@ import authRouter from "./routes/auth.js";
 import userRouter from "./routes/user.js";
 import messageRouter from "./routes/message.js";
 import communityRouter from "./routes/community.js";
+import errorMiddleware from "./middlewares/errorMiddleware.js";
 
 //env confiuration
 env.config();
@@ -14,6 +15,12 @@ dbConfig();
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+//Error Handler
+app.use(errorMiddleware);
 
 //Routers
 app.use("/api/auth", authRouter);
