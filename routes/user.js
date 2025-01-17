@@ -10,7 +10,7 @@ import {
 const router = Router();
 
 // Getting single user
-router.get("/", getUser);
+router.get("/:userId", getUser);
 
 //Searching Users
 router.get("/search")
