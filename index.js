@@ -19,14 +19,14 @@ const PORT = process.env.PORT || 8000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//Error Handler
-app.use(errorMiddleware);
-
 //Routers
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/message", messageRouter);
 app.use("/api/community", communityRouter);
+
+//Error Handler
+app.use(errorMiddleware);
 
 //Listening port
 app.listen(PORT, () => {
