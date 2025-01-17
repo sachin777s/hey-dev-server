@@ -4,6 +4,7 @@ import {
   getFollowers,
   getFollowings,
   getUser,
+  updateProfilePicture,
   updateUser,
 } from "../controllers/user.js";
 
@@ -13,10 +14,7 @@ const router = Router();
 router.get("/:userId", getUser);
 
 //Searching Users
-router.get("/search")
-
-// Updating existing user
-router.put("/", updateUser);
+router.get("/search");
 
 // Following another user
 router.put("/following", follow);
@@ -26,5 +24,10 @@ router.get("/followers", getFollowers);
 
 // Getting user's followings
 router.get("/followings", getFollowings);
+
+/***** Updating user informations *****/
+router.put("/", updateUser);
+
+router.put("/:userId/profile-picture", updateProfilePicture);
 
 export default router;

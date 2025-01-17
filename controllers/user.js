@@ -2,6 +2,7 @@ import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import User from "../models/user-model/user.model.js";
 import mongoose from "mongoose";
+import { URL_REGEX } from "../models/user-model/user.constants.js";
 
 // Getting user
 export const getUser = asyncHandler(async (req, res, next) => {
@@ -22,9 +23,6 @@ export const getUser = asyncHandler(async (req, res, next) => {
   });
 });
 
-//Update user
-export const updateUser = (req, res) => {};
-
 //Following to other user
 export const follow = (req, res) => {};
 
@@ -33,3 +31,48 @@ export const getFollowers = (req, res) => {};
 
 //Getting user's followings
 export const getFollowings = (req, res) => {};
+
+/********** Updating User Informations Routes ***********/
+
+//Update user
+export const updateUser = (req, res) => {};
+
+// Updating profilePiture
+export const updateProfilePicture = asyncHandler(async (req, res, next) => {
+  const { profilePicture } = req.body;
+  const { userId } = req.params;
+  const user = req.user; //passed by middleware
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new ApiError("Invalid userID", 400));
+  }
+
+  //   if (userId !== user._id) {   //Change after creating middleware
+  if (false) {
+    return next(new ApiError("Can't Change Other's Information", 401));
+  }
+
+  if (profilePicture) {
+    if (!URL_REGEX.test(profilePicture)) {
+      return next(new ApiError("Invalid Profile Piture URL", 400));
+    }
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      profilePicture,
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    return next(new ApiError("User not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Profile Picture Updated Successfully",
+    data: updatedUser,
+  });
+});
