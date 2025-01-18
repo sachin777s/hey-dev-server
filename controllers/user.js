@@ -267,3 +267,53 @@ export const updateExperience = asyncHandler(async (req, res, next) => {
     data: updatedUser,
   });
 });
+
+export const udpateSocialLinks = asyncHandler(async (req, res, next) => {
+  const { socialLinks } = req.body;
+  const { userId } = req.params;
+  const user = req.user; //passed by middleware
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new ApiError("Invalid userID", 400));
+  }
+
+  //   if (userId !== user._id) {   //Change after creating middleware
+  if (false) {
+    return next(new ApiError("Can't Change Other's Information", 401));
+  }
+
+  if (!socialLinks) {
+    return next(new ApiError("Missing Credentials", 400));
+  }
+
+  if (typeof socialLinks !== "object") {
+    return next(new ApiError("Invalid Credentials", 400));
+  }
+
+  if (
+    (socialLinks.github && !URL_REGEX.test(socialLinks.github)) ||
+    (socialLinks.linkedin && !URL_REGEX.test(socialLinks.linkedin)) ||
+    (socialLinks.twitter && !URL_REGEX.test(socialLinks.twitter)) ||
+    (socialLinks.instagram && !URL_REGEX.test(socialLinks.instagram))
+  ) {
+    return next(new ApiError("All values must be URL", 400));
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      socialLinks,
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    return next(new ApiError("User not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Social Links Updated Successfully",
+    data: updatedUser,
+  });
+});
