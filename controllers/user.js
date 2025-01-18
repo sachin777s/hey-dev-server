@@ -359,3 +359,41 @@ export const udpateSpokenLanguages = asyncHandler(async (req, res, next) => {
     data: updatedUser,
   });
 });
+
+// Updating Website URL
+export const updateWebsite = asyncHandler(async (req, res, next) => {
+  const { website } = req.body;
+  const { userId } = req.params;
+  const user = req.user; //passed by middleware
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new ApiError("Invalid userID", 400));
+  }
+
+  //   if (userId !== user._id) {   //Change after creating middleware
+  if (false) {
+    return next(new ApiError("Can't Change Other's Information", 401));
+  }
+
+  if (website && !URL_REGEX.test(website)) {
+    return next(new ApiError("Invalid URL", 400));
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      website,
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    return next(new ApiError("User not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Website URL Updated Successfully",
+    data: updatedUser,
+  });
+});

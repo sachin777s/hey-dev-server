@@ -12,6 +12,7 @@ import {
   updateProjects,
   updateSkills,
   updateUser,
+  updateWebsite,
 } from "../controllers/user.js";
 
 const router = Router();
@@ -41,5 +42,6 @@ router.put("/:userId/education", udpateEducation);
 router.put("/:userId/experience", updateExperience);
 router.put("/:userId/social-links", udpateSocialLinks);
 router.put("/:userId/spoken-languages", udpateSpokenLanguages);
+router.put("/:userId/website", updateWebsite);
 
 export default router;
