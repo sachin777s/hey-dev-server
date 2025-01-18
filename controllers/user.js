@@ -268,6 +268,7 @@ export const updateExperience = asyncHandler(async (req, res, next) => {
   });
 });
 
+// Updating Social Media Links
 export const udpateSocialLinks = asyncHandler(async (req, res, next) => {
   const { socialLinks } = req.body;
   const { userId } = req.params;
@@ -314,6 +315,47 @@ export const udpateSocialLinks = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Social Links Updated Successfully",
+    data: updatedUser,
+  });
+});
+
+//Updating Spoken Languages
+export const udpateSpokenLanguages = asyncHandler(async (req, res, next) => {
+  const { spokenLanguages } = req.body;
+  const { userId } = req.params;
+  const user = req.user; //passed by middleware
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new ApiError("Invalid userID", 400));
+  }
+
+  //   if (userId !== user._id) {   //Change after creating middleware
+  if (false) {
+    return next(new ApiError("Can't Change Other's Information", 401));
+  }
+
+  for (let i = 0; i < spokenLanguages.length; i++) {
+    if (typeof spokenLanguages[i] !== "string") {
+      return next(new ApiError("Invalid Spoken Languages Credentials"));
+    }
+    spokenLanguages[i] = spokenLanguages[i].trim();
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      spokenLanguages,
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    return next(new ApiError("User not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Spoken Languages Updated Successfully",
     data: updatedUser,
   });
 });

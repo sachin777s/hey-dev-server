@@ -6,6 +6,7 @@ import {
   getUser,
   udpateEducation,
   udpateSocialLinks,
+  udpateSpokenLanguages,
   updateExperience,
   updateProfilePicture,
   updateProjects,
@@ -39,4 +40,6 @@ router.put("/:userId/projects", updateProjects);
 router.put("/:userId/education", udpateEducation);
 router.put("/:userId/experience", updateExperience);
 router.put("/:userId/social-links", udpateSocialLinks);
+router.put("/:userId/spoken-languages", udpateSpokenLanguages);
+
 export default router;
