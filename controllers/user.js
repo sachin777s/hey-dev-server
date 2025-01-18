@@ -76,3 +76,45 @@ export const updateProfilePicture = asyncHandler(async (req, res, next) => {
     data: updatedUser,
   });
 });
+
+//Adding Skills
+
+export const updateSkills = asyncHandler(async (req, res, next) => {
+  const { skills } = req.body;
+  const { userId } = req.params;
+  const user = req.user; //passed by middleware
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new ApiError("Invalid userID", 400));
+  }
+
+  //   if (userId !== user._id) {   //Change after creating middleware
+  if (false) {
+    return next(new ApiError("Can't Change Other's Information", 401));
+  }
+
+  for (let i = 0; i < skills.length; i++) {
+    if (typeof skills[i] !== "string") {
+      return next(new ApiError("Invalid Skills Credential"));
+    }
+    skills[i] = skills[i].trim();
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      skills,
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    return next(new ApiError("User not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Skills Updated Successfully",
+    data: updatedUser,
+  });
+});
