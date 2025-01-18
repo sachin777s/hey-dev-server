@@ -95,7 +95,7 @@ export const updateSkills = asyncHandler(async (req, res, next) => {
 
   for (let i = 0; i < skills.length; i++) {
     if (typeof skills[i] !== "string") {
-      return next(new ApiError("Invalid Skills Credential"));
+      return next(new ApiError("Invalid Skills Credentials"));
     }
     skills[i] = skills[i].trim();
   }
@@ -115,6 +115,53 @@ export const updateSkills = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Skills Updated Successfully",
+    data: updatedUser,
+  });
+});
+
+export const updateProjects = asyncHandler(async (req, res, next) => {
+  const { projects } = req.body;
+  const { userId } = req.params;
+  const user = req.user; //passed by middleware
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new ApiError("Invalid userID", 400));
+  }
+
+  //   if (userId !== user._id) {   //Change after creating middleware
+  if (false) {
+    return next(new ApiError("Can't Change Other's Information", 401));
+  }
+
+  for (let i = 0; i < projects.length; i++) {
+    if (
+      typeof projects[i] !== "object" ||
+      !projects[i].gitUrl ||
+      !projects[i].hostUrl
+    ) {
+      return next(new ApiError("Invalid Projects Credentials", 401));
+    }
+
+    if (!URL_REGEX.test(projects[i].gitUrl) || !URL_REGEX.test(projects[i].hostUrl)) {
+      return next(new ApiError("All Values must be URLs", 401));
+    }
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      projects,
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    return next(new ApiError("User not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Projects Updated Successfully",
     data: updatedUser,
   });
 });

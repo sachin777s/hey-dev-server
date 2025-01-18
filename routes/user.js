@@ -5,6 +5,7 @@ import {
   getFollowings,
   getUser,
   updateProfilePicture,
+  updateProjects,
   updateSkills,
   updateUser,
 } from "../controllers/user.js";
@@ -31,5 +32,6 @@ router.put("/", updateUser);
 
 router.put("/:userId/profile-picture", updateProfilePicture);
 router.put("/:userId/skills", updateSkills);
+router.put("/:userId/projects",updateProjects);
 
 export default router;
