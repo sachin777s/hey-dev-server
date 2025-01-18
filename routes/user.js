@@ -5,6 +5,7 @@ import {
   getFollowings,
   getUser,
   udpateEducation,
+  updateExperience,
   updateProfilePicture,
   updateProjects,
   updateSkills,
@@ -35,4 +36,5 @@ router.put("/:userId/profile-picture", updateProfilePicture);
 router.put("/:userId/skills", updateSkills);
 router.put("/:userId/projects", updateProjects);
 router.put("/:userId/education", udpateEducation);
+router.put("/:userId/experience", updateExperience)
 export default router;
