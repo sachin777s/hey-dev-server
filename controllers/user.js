@@ -142,7 +142,10 @@ export const updateProjects = asyncHandler(async (req, res, next) => {
       return next(new ApiError("Invalid Projects Credentials", 401));
     }
 
-    if (!URL_REGEX.test(projects[i].gitUrl) || !URL_REGEX.test(projects[i].hostUrl)) {
+    if (
+      !URL_REGEX.test(projects[i].gitUrl) ||
+      !URL_REGEX.test(projects[i].hostUrl)
+    ) {
       return next(new ApiError("All Values must be URLs", 401));
     }
   }
@@ -162,6 +165,51 @@ export const updateProjects = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Projects Updated Successfully",
+    data: updatedUser,
+  });
+});
+
+export const udpateEducation = asyncHandler(async (req, res, next) => {
+  const { education } = req.body;
+  const { userId } = req.params;
+  const user = req.user; //passed by middleware
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new ApiError("Invalid userID", 400));
+  }
+
+  //   if (userId !== user._id) {   //Change after creating middleware
+  if (false) {
+    return next(new ApiError("Can't Change Other's Information", 401));
+  }
+
+  for (let i = 0; i < education.length; i++) {
+    if (
+      typeof education[i] !== "object" ||
+      !education[i].collegeName ||
+      !education[i].course ||
+      !education[i].completedIn ||
+      typeof education[i].completedIn !== "number"
+    ) {
+      return next(new ApiError("Invalid Education Credentials", 400));
+    }
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      education,
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    return next(new ApiError("User not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Education Updated Successfully",
     data: updatedUser,
   });
 });

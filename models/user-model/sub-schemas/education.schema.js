@@ -6,7 +6,7 @@ export const educationSchema = new Schema(
       type: String,
       trim: true,
     },
-    degree: {
+    course: {
       type: String,
       trim: true,
     },
