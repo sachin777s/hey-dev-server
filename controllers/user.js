@@ -27,7 +27,45 @@ export const getUser = asyncHandler(async (req, res, next) => {
 });
 
 //Following to other user
-export const follow = (req, res) => {};
+export const followUnfollow = asyncHandler(async (req, res, next) => {
+  const { userIdToToggle } = req.body;
+  const currentUserId = /*req.user.id*/ "67895c1c30144510c1741c29";
+
+  if (userIdToToggle === currentUserId) {
+    return next(ApiError("You cannot follow or unfollow yourself", 400));
+  }
+
+  const currentUser = await User.findById(currentUserId);
+  const targetUser = await User.findById(userIdToToggle);
+
+  if (!currentUser || !targetUser) {
+    return next(ApiError("User not found", 400));
+  }
+
+  const isFollowing = currentUser.followings.includes(userIdToToggle);
+
+  if (isFollowing) {
+    await User.findByIdAndUpdate(currentUserId, {
+      $pull: { followings: userIdToToggle },
+    });
+
+    await User.findByIdAndUpdate(userIdToToggle, {
+      $pull: { followers: currentUserId },
+    });
+
+    return res.status(200).json({ message: "Unfollowed successfully" });
+  } else {
+    await User.findByIdAndUpdate(currentUserId, {
+      $addToSet: { followings: userIdToToggle }, // Prevent duplicates
+    });
+
+    await User.findByIdAndUpdate(userIdToToggle, {
+      $addToSet: { followers: currentUserId }, // Prevent duplicates
+    });
+
+    return res.status(201).json({ message: "Followed successfully" });
+  }
+});
 
 //Getting user's followers
 export const getFollowers = (req, res) => {};
@@ -40,7 +78,7 @@ export const getFollowings = (req, res) => {};
 //Update user
 export const updateUser = asyncHandler(async (req, res, next) => {
   const { fullName, username, headline, about } = req.body;
-  const {_id} = req.user || {_id:"67895c1c30144510c1741c29"} // Edit after create middlware
+  const { _id } = req.user || { _id: "67895c1c30144510c1741c29" }; // Edit after create middlware
   const objectToUpdate = {};
 
   if (username) {
@@ -74,7 +112,7 @@ export const updateUser = asyncHandler(async (req, res, next) => {
   );
 
   if (!updatedUser) {
-    return next(new new ApiError("User not found", 400));
+    return next(new new ApiError("User not found", 400)());
   }
 
   res.status(200).json({

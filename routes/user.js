@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  follow,
+  followUnfollow,
   getFollowers,
   getFollowings,
   getUser,
@@ -25,7 +25,7 @@ router.get("/:userId", getUser);
 router.get("/search");
 
 // Following another user
-router.put("/following", follow);
+router.put("/following", followUnfollow);
 
 // Getting user's followers
 router.get("/followers", getFollowers);
@@ -35,7 +35,6 @@ router.get("/followings", getFollowings);
 
 /***** Updating user informations *****/
 router.put("/", updateUser);
-
 router.put("/:userId/profile-picture", updateProfilePicture);
 router.put("/:userId/skills", updateSkills);
 router.put("/:userId/projects", updateProjects);
