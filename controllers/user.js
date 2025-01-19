@@ -2,7 +2,10 @@ import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import User from "../models/user-model/user.model.js";
 import mongoose from "mongoose";
-import { URL_REGEX } from "../models/user-model/user.constants.js";
+import {
+  URL_REGEX,
+  USERNAME_REGEX,
+} from "../models/user-model/user.constants.js";
 
 // Getting user
 export const getUser = asyncHandler(async (req, res, next) => {
@@ -35,7 +38,51 @@ export const getFollowings = (req, res) => {};
 /********** Updating User Informations Routes ***********/
 
 //Update user
-export const updateUser = (req, res) => {};
+export const updateUser = asyncHandler(async (req, res, next) => {
+  const { fullName, username, headline, about } = req.body;
+  const {_id} = req.user || {_id:"67895c1c30144510c1741c29"} // Edit after create middlware
+  const objectToUpdate = {};
+
+  if (username) {
+    if (!USERNAME_REGEX.test(username))
+      return next(new ApiError("Invalid Username"));
+    objectToUpdate.username = username;
+  }
+
+  if (headline !== null) {
+    if (headline?.length > 100)
+      return next(new ApiError("Headline length must be less then 100"));
+    objectToUpdate.headline = headline;
+  }
+
+  if (about !== null) {
+    if (about?.length > 500)
+      return next(new ApiError("About length must be less then 500"));
+    objectToUpdate.about = about;
+  }
+
+  if (fullName) {
+    objectToUpdate.fullName = fullName;
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    _id,
+    {
+      ...objectToUpdate,
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    return next(new new ApiError("User not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "User Updated Successfully",
+    data: updatedUser,
+  });
+});
 
 // Updating profilePiture
 export const updateProfilePicture = asyncHandler(async (req, res, next) => {
