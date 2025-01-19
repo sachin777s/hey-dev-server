@@ -3,6 +3,7 @@ import env from "dotenv";
 import { dbConfig } from "./db/dbConfig.js";
 import authRouter from "./routes/auth.js";
 import userRouter from "./routes/user.js";
+import postRoter from "./routes/post.js";
 import messageRouter from "./routes/message.js";
 import communityRouter from "./routes/community.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 //Routers
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
+app.use("/api/post", postRoter);
 app.use("/api/message", messageRouter);
 app.use("/api/community", communityRouter);
 
