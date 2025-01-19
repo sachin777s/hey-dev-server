@@ -397,3 +397,41 @@ export const updateWebsite = asyncHandler(async (req, res, next) => {
     data: updatedUser,
   });
 });
+
+// Updating Resume
+export const udpateResume = asyncHandler(async (req, res, next) => {
+  const { resume } = req.body;
+  const { userId } = req.params;
+  const user = req.user; //passed by middleware
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new ApiError("Invalid userID", 400));
+  }
+
+  //   if (userId !== user._id) {   //Change after creating middleware
+  if (false) {
+    return next(new ApiError("Can't Change Other's Information", 401));
+  }
+
+  if (resume && !URL_REGEX.test(resume)) {
+    return next(new ApiError("Invalid Resume URL", 400));
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      resume,
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    return next(new ApiError("User not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Resume Updated Successfully Successfully",
+    data: updatedUser,
+  });
+});
