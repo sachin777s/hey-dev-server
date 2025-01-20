@@ -68,3 +68,62 @@ export const createPost = asyncHandler(async (req, res, next) => {
     message: "Post Created Successfully",
   });
 });
+
+// Updating Existing Post
+export const updatePost = asyncHandler(async (req, res, next) => {
+  const { heading, text, media } = req.body;
+  const { postId } = req.params;
+  const objectToUpdate = {};
+
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    return next(new ApiError("Invalid Post ID", 400));
+  }
+
+  if (!heading && !text && !media) {
+    return next(new ApiError("Please provide some data to update", 400));
+  }
+
+  if (heading) {
+    if (heading.length > 100) {
+      return next(
+        new ApiError("Heading must be less then 100 characters", 400)
+      );
+    }
+    objectToUpdate.heading = heading;
+  }
+
+  if (text) {
+    if (text.length > 1000) {
+      return next(new ApiError("Text must be less then 1000 characters", 400));
+    }
+    objectToUpdate.text = text;
+  }
+
+  if (media) {
+    if (
+      !media.type ||
+      (media.type !== "image" && media.type !== "video") ||
+      !media.url ||
+      !URL_REGEX.test(media.url)
+    ) {
+      return next(new ApiError("Invalid Media Format", 400));
+    }
+    objectToUpdate.media = media;
+  }
+
+  const updatedPost = await Post.findByIdAndUpdate(
+    postId,
+    { ...objectToUpdate },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedPost) {
+    return next(new ApiError("Post not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Updated Successfully",
+    updatedPost,
+  });
+});
