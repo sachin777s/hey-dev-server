@@ -42,10 +42,6 @@ const postSchema = new Schema(
       type: Number,
       default: 0,
     },
-    repliesCount: {
-      type: Number,
-      default: 0,
-    },
     community: {
       type: Schema.Types.ObjectId,
       ref: "Community",

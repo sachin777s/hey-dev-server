@@ -6,19 +6,18 @@ import { URL_REGEX } from "../models/user-model/user.constants.js";
 
 // Creating New Post
 export const createPost = asyncHandler(async (req, res, next) => {
-  let { heading, text, media, parentPostId, rootPostId, community } =
-    req.body;
+  let { heading, text, media, parentPostId, rootPostId, community } = req.body;
   const user = /*req.user._id*/ "67895c1c30144510c1741c29";
 
   if (!heading && !text && !media) {
     return next(new ApiError("Provide atleast heading, text or media", 400));
   }
 
-  if (heading.length > 100) {
+  if (heading && heading.length > 100) {
     return next(new ApiError("Heading must be less then 100 characters", 400));
   }
 
-  if (text.length > 1000) {
+  if (text && text.length > 1000) {
     return next(new ApiError("Text must be less then 1000 characters", 400));
   }
 
@@ -40,6 +39,7 @@ export const createPost = asyncHandler(async (req, res, next) => {
     ) {
       return next(new ApiError("Parent ID and Root ID must be Object ID", 400));
     }
+    heading = "";
   } else {
     rootPostId = null;
     parentPostId = null;
