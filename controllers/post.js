@@ -127,3 +127,35 @@ export const updatePost = asyncHandler(async (req, res, next) => {
     updatedPost,
   });
 });
+
+// Deleting Existing Post
+// Recursive method for deleting all the replies
+const deletePostAndReplies = async (postId) => {
+  const replies = await Post.find({ parentPostId: postId });
+
+  for (const reply of replies) {
+    await deletePostAndReplies(reply._id); //Recursive call for nested replies
+  }
+
+  await Post.findByIdAndDelete(postId);
+};
+
+export const deletePost = asyncHandler(async (req, res, next) => {
+  const { postId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    return next(new ApiError("Invalid Post ID", 400));
+  }
+
+  const postExist = await Post.findById(postId);
+  if (!postExist) {
+    return next(new ApiError("Post not found", 400));
+  }
+
+  await deletePostAndReplies(postId);
+
+  res.status(200).json({
+    success: true,
+    message: "Post deleted successfully",
+  });
+});
