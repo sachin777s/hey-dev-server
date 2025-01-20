@@ -159,3 +159,27 @@ export const deletePost = asyncHandler(async (req, res, next) => {
     message: "Post deleted successfully",
   });
 });
+
+export const getPosts = asyncHandler(async (req, res, next) => {
+  const { page = 1, limit = 10, sortBy = "createdAt" } = req.query;
+
+  const pageNum = parseInt(page, 10);
+  const pageLimit = parseInt(limit, 10);
+  const skip = (pageNum - 1) * pageLimit;
+
+  if (pageLimit > 50) {
+    return next(new ApiError("Posts limit must be less then 50", 400));
+  }
+
+  const posts = await Post.find()
+    .sort({ [sortBy]: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  res.status(200).json({
+    success: true,
+    data: {
+      posts,
+    },
+  });
+});
