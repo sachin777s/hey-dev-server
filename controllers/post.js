@@ -212,12 +212,37 @@ export const likePost = asyncHandler(async (req, res, next) => {
   );
 
   res.status(200).json({
-    message: isLiked
-      ? "Post Unliked Successfully"
-      : "Post Liked Successfully",
+    message: isLiked ? "Post Unliked Successfully" : "Post Liked Successfully",
     data: {
       likesCount: updatedPost.likes.length,
       likes: updatedPost.likes,
+    },
+  });
+});
+
+//View Post
+export const viewPost = asyncHandler(async (req, res, next) => {
+  const { postId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    return next(new ApiError("Invaid Post ID", 400));
+  }
+
+  const updatedPost = await Post.findByIdAndUpdate(
+    postId,
+    { $inc: { views: 1 } },
+    { new: true }
+  );
+
+  if (!updatedPost) {
+    return next(new ApiError("Post not found"));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Post View Udpated Successfully",
+    data: {
+      views: updatedPost.views,
     },
   });
 });
