@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import Post from "../models/post-model/post.model.js";
+import User from "../models/user-model/user.model.js";
 import { URL_REGEX } from "../models/user-model/user.constants.js";
 
 // Creating New Post
@@ -180,6 +181,43 @@ export const getPosts = asyncHandler(async (req, res, next) => {
     success: true,
     data: {
       posts,
+    },
+  });
+});
+
+// Getting User's Posts
+export const likePost = asyncHandler(async (req, res, next) => {
+  const userId = /*req.user._id */ "678a6228c557baa63975fc36";
+  const { postId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    return next(new ApiError("Invalid Post ID", 400));
+  }
+
+  const post = await Post.findById(postId);
+  if (!post) {
+    return next(new ApiError("Post not found", 400));
+  }
+
+  const isLiked = post.likes.includes(userId);
+
+  if (isLiked) {
+    post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
+  }
+
+  const updatedPost = await Post.findByIdAndUpdate(
+    postId,
+    isLiked ? { $pull: { likes: userId } } : { $addToSet: { likes: userId } },
+    { new: true }
+  );
+
+  res.status(200).json({
+    message: isLiked
+      ? "Post Unliked Successfully"
+      : "Post Liked Successfully",
+    data: {
+      likesCount: updatedPost.likes.length,
+      likes: updatedPost.likes,
     },
   });
 });

@@ -3,6 +3,7 @@ import {
   createPost,
   deletePost,
   getPosts,
+  likePost,
   updatePost,
 } from "../controllers/post.js";
 
@@ -19,5 +20,8 @@ router.delete("/:postId", deletePost);
 
 // Getting Posts
 router.get("/", getPosts);
+
+// Like the Post
+router.put("/:postId/like", likePost);
 
 export default router;
