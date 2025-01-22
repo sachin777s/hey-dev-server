@@ -29,17 +29,17 @@ export const getUser = asyncHandler(async (req, res, next) => {
 //Following to other user
 export const followUnfollow = asyncHandler(async (req, res, next) => {
   const { userIdToToggle } = req.body;
-  const currentUserId = /*req.user.id*/ "67895c1c30144510c1741c29";
+  const currentUserId = req.user._id;
 
   if (userIdToToggle === currentUserId) {
-    return next(ApiError("You cannot follow or unfollow yourself", 400));
+    return next(new ApiError("You cannot follow or unfollow yourself", 400));
   }
 
   const currentUser = await User.findById(currentUserId);
   const targetUser = await User.findById(userIdToToggle);
 
   if (!currentUser || !targetUser) {
-    return next(ApiError("User not found", 400));
+    return next(new ApiError("User not found", 400));
   }
 
   const isFollowing = currentUser.followings.includes(userIdToToggle);
@@ -78,7 +78,7 @@ export const getFollowings = (req, res) => {};
 //Update user
 export const updateUser = asyncHandler(async (req, res, next) => {
   const { fullName, username, headline, about } = req.body;
-  const { _id } = req.user || { _id: "67895c1c30144510c1741c29" }; // Edit after create middlware
+  const { _id } = req.user;
   const objectToUpdate = {};
 
   if (username) {
@@ -126,14 +126,13 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 export const updateProfilePicture = asyncHandler(async (req, res, next) => {
   const { profilePicture } = req.body;
   const { userId } = req.params;
-  const user = req.user; //passed by middleware
+  const user = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new ApiError("Invalid userID", 400));
   }
 
-  //   if (userId !== user._id) {   //Change after creating middleware
-  if (false) {
+  if (userId !== user._id) {
     return next(new ApiError("Can't Change Other's Information", 401));
   }
 
@@ -167,14 +166,13 @@ export const updateProfilePicture = asyncHandler(async (req, res, next) => {
 export const updateSkills = asyncHandler(async (req, res, next) => {
   const { skills } = req.body;
   const { userId } = req.params;
-  const user = req.user; //passed by middleware
+  const user = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new ApiError("Invalid userID", 400));
   }
 
-  //   if (userId !== user._id) {   //Change after creating middleware
-  if (false) {
+  if (userId !== user._id) {
     return next(new ApiError("Can't Change Other's Information", 401));
   }
 
@@ -208,14 +206,13 @@ export const updateSkills = asyncHandler(async (req, res, next) => {
 export const updateProjects = asyncHandler(async (req, res, next) => {
   const { projects } = req.body;
   const { userId } = req.params;
-  const user = req.user; //passed by middleware
+  const user = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new ApiError("Invalid userID", 400));
   }
 
-  //   if (userId !== user._id) {   //Change after creating middleware
-  if (false) {
+  if (userId !== user._id) {
     return next(new ApiError("Can't Change Other's Information", 401));
   }
 
@@ -259,14 +256,13 @@ export const updateProjects = asyncHandler(async (req, res, next) => {
 export const udpateEducation = asyncHandler(async (req, res, next) => {
   const { education } = req.body;
   const { userId } = req.params;
-  const user = req.user; //passed by middleware
+  const user = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new ApiError("Invalid userID", 400));
   }
 
-  //   if (userId !== user._id) {   //Change after creating middleware
-  if (false) {
+  if (userId !== user._id) {
     return next(new ApiError("Can't Change Other's Information", 401));
   }
 
@@ -305,14 +301,13 @@ export const udpateEducation = asyncHandler(async (req, res, next) => {
 export const updateExperience = asyncHandler(async (req, res, next) => {
   const { experience } = req.body;
   const { userId } = req.params;
-  const user = req.user; //passed by middleware
+  const user = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new ApiError("Invalid userID", 400));
   }
 
-  //   if (userId !== user._id) {   //Change after creating middleware
-  if (false) {
+  if (userId !== user._id) {
     return next(new ApiError("Can't Change Other's Information", 401));
   }
 
@@ -357,14 +352,13 @@ export const updateExperience = asyncHandler(async (req, res, next) => {
 export const udpateSocialLinks = asyncHandler(async (req, res, next) => {
   const { socialLinks } = req.body;
   const { userId } = req.params;
-  const user = req.user; //passed by middleware
+  const user = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new ApiError("Invalid userID", 400));
   }
 
-  //   if (userId !== user._id) {   //Change after creating middleware
-  if (false) {
+  if (userId !== user._id) {
     return next(new ApiError("Can't Change Other's Information", 401));
   }
 
@@ -408,14 +402,13 @@ export const udpateSocialLinks = asyncHandler(async (req, res, next) => {
 export const udpateSpokenLanguages = asyncHandler(async (req, res, next) => {
   const { spokenLanguages } = req.body;
   const { userId } = req.params;
-  const user = req.user; //passed by middleware
+  const user = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new ApiError("Invalid userID", 400));
   }
 
-  //   if (userId !== user._id) {   //Change after creating middleware
-  if (false) {
+  if (userId !== user._id) {
     return next(new ApiError("Can't Change Other's Information", 401));
   }
 
@@ -449,14 +442,13 @@ export const udpateSpokenLanguages = asyncHandler(async (req, res, next) => {
 export const updateWebsite = asyncHandler(async (req, res, next) => {
   const { website } = req.body;
   const { userId } = req.params;
-  const user = req.user; //passed by middleware
+  const user = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new ApiError("Invalid userID", 400));
   }
 
-  //   if (userId !== user._id) {   //Change after creating middleware
-  if (false) {
+  if (userId !== user._id) {
     return next(new ApiError("Can't Change Other's Information", 401));
   }
 
@@ -487,14 +479,13 @@ export const updateWebsite = asyncHandler(async (req, res, next) => {
 export const udpateResume = asyncHandler(async (req, res, next) => {
   const { resume } = req.body;
   const { userId } = req.params;
-  const user = req.user; //passed by middleware
+  const user = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new ApiError("Invalid userID", 400));
   }
 
-  //   if (userId !== user._id) {   //Change after creating middleware
-  if (false) {
+  if (userId !== user._id) {
     return next(new ApiError("Can't Change Other's Information", 401));
   }
 

@@ -7,6 +7,7 @@ import postRoter from "./routes/post.js";
 import messageRouter from "./routes/message.js";
 import communityRouter from "./routes/community.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
+import cookieParser from "cookie-parser";
 
 //env confiuration
 env.config();
@@ -17,6 +18,7 @@ dbConfig();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

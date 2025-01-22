@@ -15,34 +15,35 @@ import {
   updateUser,
   updateWebsite,
 } from "../controllers/user.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
 // Getting single user
-router.get("/:userId", getUser);
+router.get("/:userId", authMiddleware, getUser);
 
 //Searching Users
 router.get("/search");
 
 // Following another user
-router.put("/following", followUnfollow);
+router.put("/following", authMiddleware, followUnfollow);
 
 // Getting user's followers
-router.get("/followers", getFollowers);
+router.get("/followers", authMiddleware, getFollowers);
 
 // Getting user's followings
-router.get("/followings", getFollowings);
+router.get("/followings", authMiddleware, getFollowings);
 
 /***** Updating user informations *****/
-router.put("/", updateUser);
-router.put("/:userId/profile-picture", updateProfilePicture);
-router.put("/:userId/skills", updateSkills);
-router.put("/:userId/projects", updateProjects);
-router.put("/:userId/education", udpateEducation);
-router.put("/:userId/experience", updateExperience);
-router.put("/:userId/social-links", udpateSocialLinks);
-router.put("/:userId/spoken-languages", udpateSpokenLanguages);
-router.put("/:userId/website", updateWebsite);
-router.put("/:userId/resume", udpateResume);
+router.put("/", authMiddleware, updateUser);
+router.put("/:userId/profile-picture", authMiddleware, updateProfilePicture);
+router.put("/:userId/skills", authMiddleware, updateSkills);
+router.put("/:userId/projects", authMiddleware, updateProjects);
+router.put("/:userId/education", authMiddleware, udpateEducation);
+router.put("/:userId/experience", authMiddleware, updateExperience);
+router.put("/:userId/social-links", authMiddleware, udpateSocialLinks);
+router.put("/:userId/spoken-languages", authMiddleware, udpateSpokenLanguages);
+router.put("/:userId/website", authMiddleware, updateWebsite);
+router.put("/:userId/resume", authMiddleware, udpateResume);
 
 export default router;

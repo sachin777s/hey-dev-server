@@ -8,7 +8,7 @@ import { URL_REGEX } from "../models/user-model/user.constants.js";
 // Creating New Post
 export const createPost = asyncHandler(async (req, res, next) => {
   let { heading, text, media, parentPostId, rootPostId, community } = req.body;
-  const user = /*req.user._id*/ "67895c1c30144510c1741c29";
+  const user = req.user._id;
 
   if (!heading && !text && !media) {
     return next(new ApiError("Provide atleast heading, text or media", 400));
@@ -162,20 +162,78 @@ export const deletePost = asyncHandler(async (req, res, next) => {
 });
 
 export const getPosts = asyncHandler(async (req, res, next) => {
-  const { page = 1, limit = 10, sortBy = "createdAt" } = req.query;
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    filter,
+    type,
+  } = req.query;
+  const userId = req.user._id;
 
   const pageNum = parseInt(page, 10);
   const pageLimit = parseInt(limit, 10);
   const skip = (pageNum - 1) * pageLimit;
+  let sort = {};
+  let query = { rootPostId: null, parentPostId: null };
 
   if (pageLimit > 50) {
     return next(new ApiError("Posts limit must be less then 50", 400));
   }
 
-  const posts = await Post.find()
-    .sort({ [sortBy]: -1 })
+  // Handle filter
+  switch (filter) {
+    case "liked":
+      query = { likes: { $in: [userId] } };
+      break;
+
+    case "followed":
+      const user = await User.findById(userId).select("followings");
+      if (!user) return res.status(404).json({ error: "User not found" });
+      query = { user: { $in: user.followings } };
+      break;
+
+    case "replied":
+      query = {
+        user: userId,
+        rootPostId: { $ne: null },
+        parentPostId: { $ne: null },
+      };
+      break;
+
+    case "owned":
+      query = { user: userId };
+      break;
+
+    default:
+      break;
+  }
+
+  // Handle type for sorting
+  switch (type) {
+    case "popular":
+      sort = { likesCount: -1 };
+      break;
+
+    case "latest":
+      sort = { [sortBy]: -1 };
+      break;
+
+    case "oldest":
+      sort = { [sortBy]: 1 };
+      break;
+
+    default:
+      sort = { [sortBy]: -1 };
+      break;
+  }
+
+  const posts = await Post.find(query)
+    .sort(sort)
     .skip(skip)
-    .limit(limit);
+    .limit(parseInt(limit))
+    .populate("user", "fullName username profilePicture")
+    .exec();
 
   res.status(200).json({
     success: true,
@@ -187,7 +245,7 @@ export const getPosts = asyncHandler(async (req, res, next) => {
 
 // Getting User's Posts
 export const likePost = asyncHandler(async (req, res, next) => {
-  const userId = /*req.user._id */ "678a6228c557baa63975fc36";
+  const userId = req.user._id;
   const { postId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
