@@ -2,6 +2,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import Community from "../models/community-model/community.model.js";
 import { URL_REGEX } from "../models/user-model/user.constants.js";
+import mongoose from "mongoose";
 
 // Creating new community
 export const createCommunity = asyncHandler(async (req, res, next) => {
@@ -60,8 +61,24 @@ export const createCommunity = asyncHandler(async (req, res, next) => {
   });
 });
 
-// Getting Community
-export const gettCommunity = (req, res) => {};
+// Getting Single Community
+export const gettCommunity = asyncHandler(async (req, res, next) => {
+  const { communityId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(communityId)) {
+    return next(new ApiError("Invalid communityId params", 400));
+  }
+
+  const community = await Community.findById(communityId);
+
+  if (!community) {
+    return next(new ApiError("Community Not Found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    data: community,
+  });
+});
 
 // Updating Community
 export const updateCommunity = (req, res) => {};

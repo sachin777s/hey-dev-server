@@ -10,7 +10,7 @@ import authController from "../middlewares/authMiddleware.js";
 const router = Router();
 
 router.post("/", authController, createCommunity);
-router.get("/:id", authController, gettCommunity);
+router.get("/:communityId", authController, gettCommunity);
 router.put("/", authController, updateCommunity);
 router.delete("/", authController, deleteCommunity);
 
