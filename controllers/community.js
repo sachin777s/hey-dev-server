@@ -3,6 +3,7 @@ import ApiError from "../utils/ApiError.js";
 import Community from "../models/community-model/community.model.js";
 import { URL_REGEX } from "../models/user-model/user.constants.js";
 import mongoose from "mongoose";
+import Post from "../models/post-model/post.model.js";
 
 // Creating new community
 export const createCommunity = asyncHandler(async (req, res, next) => {
@@ -256,5 +257,71 @@ export const removeSpamMember = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Member Removed Successfully",
+  });
+});
+
+// Getting community posts
+export const gettingCommunityPosts = asyncHandler(async (req, res, next) => {
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    filter,
+    communityId,
+  } = req.query;
+
+  const pageNum = parseInt(page, 10);
+  const pageLimit = parseInt(limit, 10);
+  const skip = (pageNum - 1) * pageLimit;
+  let sort = {};
+  let query = {};
+
+  if (pageLimit > 50) {
+    return next(new ApiError("Posts limit must be less then 50", 400));
+  }
+
+  if (communityId) {
+    if (!mongoose.Types.ObjectId.isValid(communityId)) {
+      return next(new ApiError("Invalid communityId", 400));
+    }
+
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return next(new ApiError("Community not found", 400));
+    }
+    query = { community: communityId };
+  } else {
+    query = { community: { $ne: null } };
+  }
+
+  switch (filter) {
+    case "popular":
+      sort = { likesCount: -1 };
+      break;
+
+    case "latest":
+      sort = { [sortBy]: -1 };
+      break;
+
+    case "oldest":
+      sort = { [sortBy]: 1 };
+      break;
+
+    default:
+      sort = { [sortBy]: -1 };
+      break;
+  }
+
+  const posts = await Post.find(query)
+    .sort(sort)
+    .skip(skip)
+    .limit(parseInt(limit))
+    .populate("user", "fullName username profilePicture")
+    .populate("community", "name")
+    .exec();
+
+  res.status(200).json({
+    success: true,
+    data: posts,
   });
 });
