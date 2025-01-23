@@ -76,7 +76,7 @@ export const getFollowers = asyncHandler(async (req, res, next) => {
     .populate("followers", "fullName username profilePicture");
 
   if (!userExist) {
-    return next(new ApiError("User not found",400));
+    return next(new ApiError("User not found", 400));
   }
 
   const followers = userExist.followers;
@@ -88,7 +88,24 @@ export const getFollowers = asyncHandler(async (req, res, next) => {
 });
 
 //Getting user's followings
-export const getFollowings = (req, res) => {};
+export const getFollowings = asyncHandler(async (req, res, next) => {
+  const user = req.user;
+
+  const userExist = await User.findById(user._id)
+    .select("followings")
+    .populate("followings", "fullName username profilePicture");
+
+  if (!userExist) {
+    return next(new ApiError("User not found", 400));
+  }
+
+  const followings = userExist.followings;
+
+  res.status(200).json({
+    success: true,
+    data: { followings },
+  });
+});
 
 /********** Updating User Informations Routes ***********/
 
