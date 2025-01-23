@@ -143,7 +143,23 @@ export const updateCommunity = asyncHandler(async (req, res, next) => {
 });
 
 // Deleting Existing Community
-export const deleteCommunity = (req, res) => {};
+export const deleteCommunity = asyncHandler(async (req, res, next) => {
+  const { communityId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(communityId)) {
+    return next(new ApiError("Invalid communityId params", 400));
+  }
+
+  const community = await Community.findByIdAndDelete(communityId);
+
+  if (!community) {
+    return next(new ApiError("Community not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Community Deleted Successfully",
+  });
+});
 
 // Getting Multiple Communities bases on Limit and Page
 export const getMultipleCommunities = asyncHandler(async (req, res, next) => {

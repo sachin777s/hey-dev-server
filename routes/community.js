@@ -23,6 +23,6 @@ router.get("/", authController, getMultipleCommunities);
 router.put("/:communityId", authController, updateCommunity);
 
 // Deleting existing community
-router.delete("/", authController, deleteCommunity);
+router.delete("/:communityId", authController, deleteCommunity);
 
 export default router;
