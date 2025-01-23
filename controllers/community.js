@@ -85,3 +85,25 @@ export const updateCommunity = (req, res) => {};
 
 // Deleting Existing Community
 export const deleteCommunity = (req, res) => {};
+
+// Getting Multiple Communities bases on Limit and Page
+export const getMultipleCommunities = asyncHandler(async (req, res, next) => {
+  const { page = 1, limit = 10, sortBy = "createdAt" } = req.query;
+  const pageNum = parseInt(page, 10);
+  const pageLimit = parseInt(limit, 10);
+  const skip = (pageNum - 1) * pageLimit;
+
+  const communities = await Community.find()
+    .sort({ [sortBy]: -1 })
+    .skip(skip)
+    .limit(parseInt(limit))
+    .populate({
+      path: "members",
+      select: "profilePicture",
+    });
+
+  res.status(200).json({
+    success: true,
+    data: communities,
+  });
+});
