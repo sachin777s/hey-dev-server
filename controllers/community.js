@@ -81,7 +81,66 @@ export const gettCommunity = asyncHandler(async (req, res, next) => {
 });
 
 // Updating Community
-export const updateCommunity = (req, res) => {};
+export const updateCommunity = asyncHandler(async (req, res, next) => {
+  const { name, headline, description, logo, rules } = req.body;
+  const { communityId } = req.params;
+  const objectToUpdate = {};
+  if (!name && !headline && !description && !logo && !rules) {
+    return next(new ApiError("Atleast one field is required to update", 400));
+  }
+
+  if (name) {
+    if (name.length > 50) {
+      return next(
+        new ApiError("Community Name must be less then 50 characters", 400)
+      );
+    }
+    objectToUpdate.name = name;
+  }
+
+  if (headline) {
+    if (headline.length > 100) {
+      return next(
+        new ApiError("Community Headline must be less then 100 characters", 400)
+      );
+    }
+    objectToUpdate.headline = headline;
+  }
+
+  if (description) {
+    if (description.length < 50 || description.length > 500) {
+      return next(
+        new ApiError(
+          "Community Description should be over 100 and under 500 characters",
+          400
+        )
+      );
+    }
+    objectToUpdate.description = description;
+  }
+
+  if (logo) {
+    if (!URL_REGEX.test(logo)) {
+      return next(new ApiError("Logo URL is invalid", 400));
+    }
+    objectToUpdate.logo = logo;
+  }
+
+  const updatedCommunity = await Community.findByIdAndUpdate(
+    communityId,
+    objectToUpdate,
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedCommunity) {
+    return next(new ApiError("Community not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    data: updatedCommunity,
+  });
+});
 
 // Deleting Existing Community
 export const deleteCommunity = (req, res) => {};

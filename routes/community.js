@@ -20,7 +20,7 @@ router.get("/:communityId", authController, gettCommunity);
 router.get("/", authController, getMultipleCommunities);
 
 // Updating existing community
-router.put("/", authController, updateCommunity);
+router.put("/:communityId", authController, updateCommunity);
 
 // Deleting existing community
 router.delete("/", authController, deleteCommunity);
