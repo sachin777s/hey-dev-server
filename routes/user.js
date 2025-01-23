@@ -29,10 +29,10 @@ router.get("/search");
 router.put("/following", authMiddleware, followUnfollow);
 
 // Getting user's followers
-router.get("/followers", authMiddleware, getFollowers);
+router.get("/followers/get", authMiddleware, getFollowers);
 
 // Getting user's followings
-router.get("/followings", authMiddleware, getFollowings);
+router.get("/followings/get", authMiddleware, getFollowings);
 
 /***** Updating user informations *****/
 router.put("/", authMiddleware, updateUser);

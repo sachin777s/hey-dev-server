@@ -68,7 +68,24 @@ export const followUnfollow = asyncHandler(async (req, res, next) => {
 });
 
 //Getting user's followers
-export const getFollowers = (req, res) => {};
+export const getFollowers = asyncHandler(async (req, res, next) => {
+  const user = req.user;
+
+  const userExist = await User.findById(user._id)
+    .select("followers")
+    .populate("followers", "fullName username profilePicture");
+
+  if (!userExist) {
+    return next(new ApiError("User not found",400));
+  }
+
+  const followers = userExist.followers;
+
+  res.status(200).json({
+    success: true,
+    data: { followers },
+  });
+});
 
 //Getting user's followings
 export const getFollowings = (req, res) => {};
