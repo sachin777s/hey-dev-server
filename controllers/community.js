@@ -182,3 +182,37 @@ export const getMultipleCommunities = asyncHandler(async (req, res, next) => {
     data: communities,
   });
 });
+
+export const joinAndLeftCommunity = asyncHandler(async (req, res, next) => {
+  const { communityId } = req.params;
+  const user = req.user;
+
+  if (!mongoose.Types.ObjectId.isValid(communityId)) {
+    return next(new ApiError("Invalid communityId params", 400));
+  }
+
+  const community = await Community.findById(communityId);
+  if (!community) {
+    return next(new ApiError("Community not found", 400));
+  }
+
+  const isJoined = community.members.includes(user._id);
+
+  let responseMessage = "";
+  if (isJoined) {
+    await Community.findByIdAndUpdate(communityId, {
+      $pull: { members: user._id },
+    });
+    responseMessage = "Lefted Community Successfully";
+  } else {
+    await Community.findByIdAndUpdate(communityId, {
+      $addToSet: { members: user._id },
+    });
+    responseMessage = "Joined Community Successfully";
+  }
+
+  res.status(200).json({
+    success: true,
+    message: responseMessage,
+  });
+});

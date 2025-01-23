@@ -5,6 +5,7 @@ import {
   getMultipleCommunities,
   gettCommunity,
   updateCommunity,
+  joinAndLeftCommunity
 } from "../controllers/community.js";
 import authController from "../middlewares/authMiddleware.js";
 
@@ -24,5 +25,7 @@ router.put("/:communityId", authController, updateCommunity);
 
 // Deleting existing community
 router.delete("/:communityId", authController, deleteCommunity);
+
+router.put("/:communityId/join", authController, joinAndLeftCommunity)
 
 export default router;
