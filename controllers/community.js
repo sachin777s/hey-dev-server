@@ -183,6 +183,7 @@ export const getMultipleCommunities = asyncHandler(async (req, res, next) => {
   });
 });
 
+// Joining and Lefting the community
 export const joinAndLeftCommunity = asyncHandler(async (req, res, next) => {
   const { communityId } = req.params;
   const user = req.user;
@@ -214,5 +215,46 @@ export const joinAndLeftCommunity = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: responseMessage,
+  });
+});
+
+export const removeSpamMember = asyncHandler(async (req, res, next) => {
+  const { communityId } = req.params;
+  const user = req.user;
+  const { memberId } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(communityId)) {
+    return next(new ApiError("Invalid communityId params", 400));
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(memberId)) {
+    return next(new ApiError("Invalid memberId params", 400));
+  }
+
+  const community = await Community.findById(communityId);
+
+  if (!community) {
+    return next(new ApiError("Community not found", 400));
+  }
+
+  const doesMemberExist = community.members.includes(memberId);
+
+  if (community.creator.toString() !== user._id.toString()) {
+    return next(new ApiError("You are not owner of this community"));
+  }
+
+  if (doesMemberExist) {
+    await Community.findByIdAndUpdate(communityId, {
+      $pull: { members: memberId },
+    });
+  } else {
+    return next(
+      new ApiError(`This user is not the member of ${community.name}`)
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Member Removed Successfully",
   });
 });
