@@ -19,6 +19,7 @@ const communitySchema = new Schema(
       type: String,
       required: true,
       maxlength: 500,
+      minLength: 50,
     },
     logo: {
       type: String,
