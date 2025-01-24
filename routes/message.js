@@ -13,7 +13,7 @@ const router = Router();
 router.post("/", authMiddleware, createMessage);
 
 //Getting Message
-router.get("/:id", authMiddleware, gettingMessages);
+router.get("/", authMiddleware, gettingMessages);
 
 //Updating existing message
 router.put("/", authMiddleware, updateMessage);

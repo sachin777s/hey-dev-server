@@ -41,7 +41,18 @@ export const createMessage = asyncHandler(async (req, res, next) => {
 });
 
 // Getting Messages
-export const gettingMessages = (req, res) => {};
+export const gettingMessages = asyncHandler(async (req, res, next) => {
+  const user = req.user;
+
+  const messages = await Message.find({
+    $or: [{ reciever: user._id }, { sender: user._id }],
+  });
+
+  res.status(200).json({
+    success: true,
+    data: messages,
+  });
+});
 
 // Updating existing message
 export const updateMessage = (req, res) => {};
