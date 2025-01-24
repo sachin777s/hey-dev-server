@@ -98,4 +98,27 @@ export const updateMessage = asyncHandler(async (req, res, next) => {
 });
 
 // Deleting existing message
-export const deleteMessage = (req, res) => {};
+export const deleteMessage = asyncHandler(async (req, res, next) => {
+  const { messageId } = req.params;
+  const user = req.user;
+
+  if (!messageId || !mongoose.Types.ObjectId.isValid(messageId)) {
+    return next(new ApiError("Invalid or Missing Message ID", 400));
+  }
+
+  const message = await Message.findById(messageId);
+  if (!message) {
+    return next(new ApiError("Message not found", 400));
+  }
+
+  if (user._id.toString() !== message.sender.toString()) {
+    return next(new ApiError("You can't delete this message", 400));
+  }
+
+  await Message.findByIdAndDelete(messageId);
+
+  res.status(200).json({
+    success: true,
+    message: "Message deleted successfully",
+  });
+});

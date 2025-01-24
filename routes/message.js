@@ -19,6 +19,6 @@ router.get("/", authMiddleware, gettingMessages);
 router.put("/:messageId", authMiddleware, updateMessage);
 
 //Deleting existing message
-router.delete("/", authMiddleware, deleteMessage);
+router.delete("/:messageId", authMiddleware, deleteMessage);
 
 export default router;
