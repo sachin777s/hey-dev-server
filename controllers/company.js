@@ -1,0 +1,94 @@
+import ApiError from "../utils/ApiError.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { EMAIL_REGEX, URL_REGEX } from "../models/user-model/user.constants.js";
+import Company from "../models/company-model/company.model.js";
+
+// Creating New Company
+export const createCompany = asyncHandler(async (req, res, next) => {
+  const {
+    name,
+    headline,
+    description,
+    logo,
+    website,
+    size,
+    foundedIn,
+    industry,
+    email,
+    phone,
+  } = req.body;
+  const user = req.user;
+
+  if (
+    !name ||
+    !headline ||
+    !description ||
+    !website ||
+    !size ||
+    !foundedIn ||
+    !industry ||
+    !email
+  ) {
+    return next(new ApiError("Missing Credentials", 400));
+  }
+
+  if (headline.length > 100) {
+    return next(new ApiError("Headline must be under 100 characters", 400));
+  }
+
+  if (description.length > 1000) {
+    return next(new ApiError("Description must be under 1000 characters", 400));
+  }
+
+  if (logo && !URL_REGEX.test(logo)) {
+    return next(new ApiError("Logo URL is not valid", 400));
+  }
+
+  if (!URL_REGEX.test(website)) {
+    return next(new ApiError("Website URL is not valid", 400));
+  }
+
+  if (
+    !["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"].some(
+      (value) => size === value
+    )
+  ) {
+    return next(new ApiError("Invalid company size format", 400));
+  }
+
+  if (foundedIn > new Date().getFullYear() || foundedIn < 1800) {
+    return next(
+      new ApiError(
+        `foundedIn field must be between 1800 to ${new Date().getFullYear()}`,
+        400
+      )
+    );
+  }
+
+  if (!EMAIL_REGEX.test(email)) {
+    return next(new ApiError("Invalid email format", 400));
+  }
+
+  if (phone && phone.length < 10) {
+    return next(new ApiError("Phone Number length should be minimum 10", 400));
+  }
+
+  await Company.create({
+    name,
+    headline,
+    description,
+    logo,
+    website,
+    size,
+    foundedIn,
+    industry,
+    email,
+    phone,
+    owner: user._id
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Company Page Created Successfully",
+  });
+});
