@@ -122,3 +122,28 @@ export const deleteMessage = asyncHandler(async (req, res, next) => {
     message: "Message deleted successfully",
   });
 });
+
+export const clearChat = asyncHandler(async (req, res, next) => {
+  const { recieverId } = req.params;
+  const user = req.user;
+
+  if (!recieverId || !mongoose.Types.ObjectId.isValid(recieverId)) {
+    return next(new ApiError("Invalid or Missing Reciever ID", 400));
+  }
+
+  if (recieverId.toString() === user._id.toString()) {
+    return next(new ApiError("Reciever and Sender can't be same"));
+  }
+
+  const reciever = await User.findById(recieverId);
+  if (!reciever) {
+    return next(new ApiError("Invalid or Missing Reciever ID", 400));
+  }
+
+  await Message.deleteMany({ sender: user._id, reciever: recieverId });
+
+  res.status(200).json({
+    success: true,
+    message: "Chats Erased successfully",
+  });
+});

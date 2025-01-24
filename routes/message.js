@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  clearChat,
   createMessage,
   deleteMessage,
   gettingMessages,
@@ -20,5 +21,7 @@ router.put("/:messageId", authMiddleware, updateMessage);
 
 //Deleting existing message
 router.delete("/:messageId", authMiddleware, deleteMessage);
+
+router.delete("/chat/clear/:recieverId", authMiddleware, clearChat);
 
 export default router;
