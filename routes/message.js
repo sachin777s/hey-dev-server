@@ -5,19 +5,20 @@ import {
   gettingMessages,
   updateMessage,
 } from "../controllers/message.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
 //Creating new message
-router.post("/", createMessage);
+router.post("/", authMiddleware, createMessage);
 
 //Getting Message
-router.get("/:id", gettingMessages);
+router.get("/:id", authMiddleware, gettingMessages);
 
 //Updating existing message
-router.put("/", updateMessage);
+router.put("/", authMiddleware, updateMessage);
 
 //Deleting existing message
-router.delete("/", deleteMessage);
+router.delete("/", authMiddleware, deleteMessage);
 
 export default router;
