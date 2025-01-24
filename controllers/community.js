@@ -205,11 +205,13 @@ export const joinAndLeftCommunity = asyncHandler(async (req, res, next) => {
   if (isJoined) {
     await Community.findByIdAndUpdate(communityId, {
       $pull: { members: user._id },
+      $inc: { memberCount: -1 },
     });
     responseMessage = "Lefted Community Successfully";
   } else {
     await Community.findByIdAndUpdate(communityId, {
       $addToSet: { members: user._id },
+      $inc: { memberCount: 1 },
     });
     responseMessage = "Joined Community Successfully";
   }
@@ -248,6 +250,7 @@ export const removeSpamMember = asyncHandler(async (req, res, next) => {
   if (doesMemberExist) {
     await Community.findByIdAndUpdate(communityId, {
       $pull: { members: memberId },
+      $inc: { memberCount: -1 },
     });
   } else {
     return next(
