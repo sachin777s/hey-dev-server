@@ -329,7 +329,7 @@ export const gettingCommunityPosts = asyncHandler(async (req, res, next) => {
 
 // Getting Community's Members
 export const gettingCommunityMembers = asyncHandler(async (req, res, next) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, search } = req.query;
   const { communityId } = req.params;
 
   const pageNum = parseInt(page, 10);
@@ -339,6 +339,16 @@ export const gettingCommunityMembers = asyncHandler(async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(communityId)) {
     return next(new ApiError("Invalid commuityID", 400));
   }
+
+  // Create a search regex if search query is provided
+  const searchQuery = search
+    ? {
+        $or: [
+          { username: { $regex: search, $options: "i" } },
+          { fullName: { $regex: search, $options: "i" } },
+        ],
+      }
+    : {};
 
   const community = await Community.findById(communityId)
     .select("members creator")
@@ -350,12 +360,15 @@ export const gettingCommunityMembers = asyncHandler(async (req, res, next) => {
 
   let membersIdArray = community.members;
 
-  let members = await User.find({ _id: { $in: membersIdArray } })
+  let members = await User.find({
+    _id: { $in: membersIdArray },
+    ...searchQuery,
+  })
     .select("username fullName profilePicture")
     .skip(skip)
-    .limit(parseInt(limit-1));
+    .limit(parseInt(limit - 1));
 
-  if (pageNum === 1) {
+  if (pageNum === 1 && !search) {
     const owner = await User.findById(community.creator)
       .select("username fullName profilePicture")
       .lean();
