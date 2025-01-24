@@ -229,3 +229,28 @@ export const updateCompany = asyncHandler(async (req, res, next) => {
     data: updatedCompany,
   });
 });
+
+export const deleteCompany = asyncHandler(async (req, res, next) => {
+  const user = req.user;
+  const { companyId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(companyId)) {
+    return next(new ApiError("Invalid Community ID", 400));
+  }
+
+  const company = await Company.findById(companyId);
+  if (!company) {
+    return next(new ApiError("Company not found", 400));
+  }
+
+  if (company.owner.toString() !== user._id) {
+    return next(new ApiError("You can't delete this company", 400));
+  }
+
+  await Company.findByIdAndDelete(companyId);
+
+  res.status(200).json({
+    success: true,
+    message: "Company Deleted Successfully",
+  });
+});
