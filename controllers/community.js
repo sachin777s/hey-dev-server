@@ -1,6 +1,7 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import Community from "../models/community-model/community.model.js";
+import User from "../models/user-model/user.model.js";
 import { URL_REGEX } from "../models/user-model/user.constants.js";
 import mongoose from "mongoose";
 import Post from "../models/post-model/post.model.js";
@@ -323,5 +324,46 @@ export const gettingCommunityPosts = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     data: posts,
+  });
+});
+
+// Getting Community's Members
+export const gettingCommunityMembers = asyncHandler(async (req, res, next) => {
+  const { page = 1, limit = 10 } = req.query;
+  const { communityId } = req.params;
+
+  const pageNum = parseInt(page, 10);
+  const pageLimit = parseInt(limit - 1, 10);
+  const skip = (pageNum - 1) * pageLimit;
+
+  if (!mongoose.Types.ObjectId.isValid(communityId)) {
+    return next(new ApiError("Invalid commuityID", 400));
+  }
+
+  const community = await Community.findById(communityId)
+    .select("members creator")
+    .populate("members", "_id");
+
+  if (!community) {
+    return next(new ApiError("Community Not Found"));
+  }
+
+  let membersIdArray = community.members;
+
+  let members = await User.find({ _id: { $in: membersIdArray } })
+    .select("username fullName profilePicture")
+    .skip(skip)
+    .limit(parseInt(limit-1));
+
+  if (pageNum === 1) {
+    const owner = await User.findById(community.creator)
+      .select("username fullName profilePicture")
+      .lean();
+    members = owner ? [owner, ...members] : members;
+  }
+
+  res.status(200).json({
+    success: true,
+    data: members,
   });
 });

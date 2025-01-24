@@ -8,6 +8,7 @@ import {
   joinAndLeftCommunity,
   removeSpamMember,
   gettingCommunityPosts,
+  gettingCommunityMembers,
 } from "../controllers/community.js";
 import authController from "../middlewares/authMiddleware.js";
 
@@ -36,5 +37,8 @@ router.put("/:communityId/remove", authController, removeSpamMember);
 
 // Getting Community's Posts
 router.get("/posts/get", authController, gettingCommunityPosts);
+
+// Getting Community's Members
+router.get("/:communityId/members", authController, gettingCommunityMembers);
 
 export default router;
