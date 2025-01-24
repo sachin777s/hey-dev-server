@@ -55,7 +55,47 @@ export const gettingMessages = asyncHandler(async (req, res, next) => {
 });
 
 // Updating existing message
-export const updateMessage = (req, res) => {};
+export const updateMessage = asyncHandler(async (req, res, next) => {
+  const { text, image } = req.body;
+  const { messageId } = req.params;
+  const user = req.user;
+  const objectToUdpate = {};
+
+  if (!text && !image) {
+    return next(
+      new ApiError("Provide atleast one, text or image to update", 400)
+    );
+  }
+
+  if (text) {
+    objectToUdpate.text = text;
+  }
+
+  if (image) {
+    if (!URL_REGEX.test(image)) {
+      return next(new ApiError("Image URL is invalid", 400));
+    }
+    objectToUdpate.image = image;
+  }
+
+  const message = await Message.findById(messageId);
+
+  if (user._id.toString() !== message.sender.toString()) {
+    return next(new ApiError("You can't edit this message", 400));
+  }
+
+  const updatedMessage = await Message.findByIdAndUpdate(
+    messageId,
+    objectToUdpate,
+    { new: true, runValidators: true }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Message Updated Successfully",
+    data: updatedMessage,
+  });
+});
 
 // Deleting existing message
 export const deleteMessage = (req, res) => {};

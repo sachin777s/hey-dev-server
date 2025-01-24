@@ -16,7 +16,7 @@ router.post("/", authMiddleware, createMessage);
 router.get("/", authMiddleware, gettingMessages);
 
 //Updating existing message
-router.put("/", authMiddleware, updateMessage);
+router.put("/:messageId", authMiddleware, updateMessage);
 
 //Deleting existing message
 router.delete("/", authMiddleware, deleteMessage);
