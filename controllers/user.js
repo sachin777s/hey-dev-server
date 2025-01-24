@@ -6,6 +6,7 @@ import {
   URL_REGEX,
   USERNAME_REGEX,
 } from "../models/user-model/user.constants.js";
+import Community from "../models/community-model/community.model.js";
 
 // Getting user
 export const getUser = asyncHandler(async (req, res, next) => {
@@ -104,6 +105,28 @@ export const getFollowings = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     data: { followings },
+  });
+});
+
+// Getting user's communities
+export const getUserCommunities = asyncHandler(async (req, res, next) => {
+  const { userId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new ApiError("Invalid userId", 400));
+  }
+
+  const ownedCommunities = await Community.find({ creator: userId }).select(
+    "name logo memberCount"
+  );
+
+  const participatingCommunities = await Community.find({
+    members: { $in: [userId] },
+  }).select("name logo memberCount");
+
+  res.status(200).json({
+    success: true,
+    data: [...ownedCommunities, ...participatingCommunities],
   });
 });
 

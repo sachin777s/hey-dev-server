@@ -14,6 +14,7 @@ import {
   updateSkills,
   updateUser,
   updateWebsite,
+  getUserCommunities,
 } from "../controllers/user.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -33,6 +34,9 @@ router.get("/followers/get", authMiddleware, getFollowers);
 
 // Getting user's followings
 router.get("/followings/get", authMiddleware, getFollowings);
+
+// Getting user's comunities
+router.get("/:userId/communities", authMiddleware, getUserCommunities);
 
 /***** Updating user informations *****/
 router.put("/", authMiddleware, updateUser);
