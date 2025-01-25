@@ -305,8 +305,24 @@ export const deleteJob = asyncHandler(async (req, res, next) => {
   });
 });
 
-// Getting Single JOb
-export const getSingleJob = asyncHandler(async (req, res, next) => {});
+// Getting Single Job
+export const getSingleJob = asyncHandler(async (req, res, next) => {
+  const { jobId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(jobId)) {
+    return next(new ApiError("Invalid Job ID", 400));
+  }
+
+  const job = await Job.findById(jobId);
+  if (!job) {
+    return next(new ApiError("Job not found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    data: job,
+  });
+});
 
 // Getting Multiple Jobs based on page and limit ( Infinite Scrolling )
 export const getMultipleJob = asyncHandler(async (req, res, next) => {});
