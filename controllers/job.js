@@ -380,3 +380,30 @@ export const getMultipleJob = asyncHandler(async (req, res, next) => {
     data: jobs,
   });
 });
+
+// Apply in job
+export const applyInJob = asyncHandler(async (req, res, next) => {
+  const { jobId } = req.params;
+  const user = req.user;
+
+  if (!mongoose.Types.ObjectId.isValid(jobId)) {
+    return next(new ApiError("Invalid Job ID", 400));
+  }
+  const job = await Job.findById(jobId);
+  if (!job) {
+    return next(new ApiError("Job not found", 400));
+  }
+
+  if (isLessThanCurrentDate(job.deadline)) {
+    return next(
+      new ApiError("The deadline has passed. You can no longer apply", 400)
+    );
+  }
+
+  await Job.findByIdAndUpdate(jobId, { $addToSet: { applicants: user._id } });
+
+  res.status(200).json({
+    success: true,
+    message: "Applied Successfully",
+  });
+});
