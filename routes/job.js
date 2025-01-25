@@ -16,7 +16,7 @@ router.post("/",authMiddleware, createJob);
 router.put("/:jobId",authMiddleware, updateJob);
 
 // Deleting Existing Job
-router.delete("/:job",authMiddleware, deleteJob);
+router.delete("/:jobId",authMiddleware, deleteJob);
 
 // Getting Single Job
 router.get("/:jobId",authMiddleware, getSingleJob);

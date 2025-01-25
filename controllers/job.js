@@ -268,7 +268,7 @@ export const updateJob = asyncHandler(async (req, res, next) => {
   }
 
   const updatedJob = await Job.findByIdAndUpdate(jobId, objectToUpdate, {
-    new: true
+    new: true,
   });
 
   res.status(201).json({
@@ -279,7 +279,31 @@ export const updateJob = asyncHandler(async (req, res, next) => {
 });
 
 // Deleting Existing Job
-export const deleteJob = asyncHandler(async (req, res, next) => {});
+export const deleteJob = asyncHandler(async (req, res, next) => {
+  const { jobId } = req.params;
+  const user = req.user;
+
+  if (!mongoose.Types.ObjectId.isValid(jobId)) {
+    return next(new ApiError("Invalid Job ID", 400));
+  }
+
+  const job = await Job.findById(jobId);
+  if (!job) {
+    return next(new ApiError("Job not found", 400));
+  }
+
+  const company = await Company.findById(job.company);
+  if (user._id.toString() !== company.owner.toString()) {
+    return next(new ApiError("You can't delete this job", 400));
+  }
+
+  await Job.findByIdAndDelete(jobId);
+
+  res.status(200).json({
+    success: true,
+    message: "Job Deleted Successfully",
+  });
+});
 
 // Getting Single JOb
 export const getSingleJob = asyncHandler(async (req, res, next) => {});
