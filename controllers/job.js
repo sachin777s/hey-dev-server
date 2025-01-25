@@ -4,6 +4,7 @@ import Company from "../models/company-model/company.model.js";
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { DATE_REGEX, isLessThanCurrentDate } from "../utils/contants.js";
+import { query } from "express";
 
 // Creating New Job
 export const createJob = asyncHandler(async (req, res, next) => {
@@ -325,4 +326,57 @@ export const getSingleJob = asyncHandler(async (req, res, next) => {
 });
 
 // Getting Multiple Jobs based on page and limit ( Infinite Scrolling )
-export const getMultipleJob = asyncHandler(async (req, res, next) => {});
+export const getMultipleJob = asyncHandler(async (req, res, next) => {
+  const {
+    page = 1,
+    limit = 10,
+    role,
+    experience,
+    location,
+    locationType,
+  } = req.query;
+  const pageNum = parseInt(page, 10);
+  const pageLimit = parseInt(limit, 10);
+  const skip = (pageNum - 1) * pageLimit;
+  let query = {};
+
+  if (role) {
+    query = {
+      ...query,
+      $or: [
+        { role: { $regex: role, $options: "i" } },
+        { description: { $regex: role, $options: "i" } },
+      ],
+    };
+  }
+
+  if (location) {
+    query.location = { $regex: location, $options: "i" };
+  }
+
+  if (parseInt(experience) >= 0) {
+    if (parseInt(experience) > 6) {
+      query.experienceInYear = { $gt: parseInt(experience) };
+    } else {
+      query.experienceInYear = parseInt(experience);
+    }
+  }
+
+  if (
+    locationType === "Remote" ||
+    locationType === "Office" ||
+    locationType === "Hybrid"
+  ) {
+    query.locationType = locationType;
+  }
+
+  const jobs = await Job.find(query)
+    .skip(skip)
+    .limit(parseInt(limit))
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    data: jobs,
+  });
+});
