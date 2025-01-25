@@ -6,6 +6,7 @@ import {
   getSingleJob,
   getMultipleJob,
   applyInJob,
+  getJobApplicants,
 } from "../controllers/job.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -27,5 +28,8 @@ router.get("/", authMiddleware, getMultipleJob);
 
 // Apply in the Job
 router.put("/:jobId/apply", authMiddleware, applyInJob);
+
+// Get job applicants
+router.get("/:jobId/applicants", authMiddleware, getJobApplicants);
 
 export default router;

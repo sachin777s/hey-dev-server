@@ -5,6 +5,7 @@ import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { DATE_REGEX, isLessThanCurrentDate } from "../utils/contants.js";
 import { query } from "express";
+import User from "../models/user-model/user.model.js";
 
 // Creating New Job
 export const createJob = asyncHandler(async (req, res, next) => {
@@ -405,5 +406,35 @@ export const applyInJob = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Applied Successfully",
+  });
+});
+
+// Getting Job Applicants
+export const getJobApplicants = asyncHandler(async (req, res, next) => {
+  const { jobId } = req.params;
+  const user = req.user;
+
+  if (!mongoose.Types.ObjectId.isValid(jobId)) {
+    return next(new ApiError("Invalid Job Id", 400));
+  }
+
+  const job = await Job.findById(jobId);
+  if (!job) {
+    return next(new ApiError("Job not found", 400));
+  }
+
+  const company = await Company.findById(job.company);
+
+  if (user._id.toString() !== company.owner.toString()) {
+    return next(new ApiError("You can't access job applicants data"));
+  }
+
+  const applicants = await User.find({ _id: { $in: job.applicants } }).select(
+    "fullName username profilePicture resume email"
+  );
+
+  res.status(200).json({
+    success: true,
+    data: applicants,
   });
 });
