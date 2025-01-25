@@ -129,7 +129,154 @@ export const createJob = asyncHandler(async (req, res, next) => {
 });
 
 // Updating Existing Job
-export const updateJob = asyncHandler(async (req, res, next) => {});
+export const updateJob = asyncHandler(async (req, res, next) => {
+  let {
+    role,
+    description,
+    skills,
+    experienceInYear,
+    salary,
+    locationType,
+    location,
+    openings,
+    deadline,
+  } = req.body;
+  const user = req.user;
+  const { jobId } = req.params;
+  const objectToUpdate = {};
+
+  if (
+    !role &&
+    !description &&
+    !skills &&
+    !experienceInYear &&
+    !salary &&
+    !locationType &&
+    !location &&
+    !openings &&
+    !deadline
+  ) {
+    return next(new ApiError("Provide Atleast one field to update", 400));
+  }
+
+  if (role) {
+    objectToUpdate.role = role;
+  }
+
+  if (description) {
+    if (description.length > 2000) {
+      return next(new ApiError("Description can't exeed 2000 charcters", 400));
+    }
+    objectToUpdate.description = description;
+  }
+
+  if (skills) {
+    if (
+      !Array.isArray(skills) ||
+      skills.some((skill) => typeof skill !== "string")
+    ) {
+      return next(new ApiError("Invalid Skills format", 400));
+    }
+    objectToUpdate.skills = skills;
+  }
+
+  if (!experienceInYear) {
+    if (experienceInYear < 0) {
+      return next(new ApiError("Experience can't be less than 0", 400));
+    }
+    objectToUpdate.experienceInYear = experienceInYear;
+  }
+
+  if (salary) {
+    if (
+      typeof salary !== "object" ||
+      !salary.minRange ||
+      !salary.maxRange ||
+      salary.minRange <= 0 ||
+      salary.maxRange <= 0
+    ) {
+      return next(new ApiError("Invalid Salary Format", 400));
+    }
+
+    if (salary.minRange === salary.maxRange) {
+      return next(
+        new ApiError("Minimum and maximum salary can't be same", 400)
+      );
+    }
+    objectToUpdate.salary = salary;
+  }
+
+  if (locationType) {
+    if (
+      locationType !== "Office" &&
+      locationType !== "Remote" &&
+      locationType !== "Hybrid"
+    ) {
+      return next(
+        new ApiError(
+          "Location Type should be 'Office', 'Remote' or 'Hybrid'",
+          400
+        )
+      );
+    }
+    objectToUpdate.locationType = locationType;
+  }
+
+  if (locationType === "Remote") {
+    objectToUpdate.location = null;
+  }
+
+  if (locationType === "Office" || locationType === "Hybrid") {
+    if (!location) {
+      return next(new ApiError("Location is required with Office or Hybrid"));
+    } else {
+      objectToUpdate.location = location;
+    }
+  }
+
+  if (openings) {
+    if (openings <= 0) {
+      return next(new ApiError("Atleast one opening is required", 400));
+    }
+    objectToUpdate.openings = openings;
+  }
+
+  if (deadline) {
+    if (!DATE_REGEX.test(deadline)) {
+      return next(new ApiError("Invalid Date Format", 400));
+    }
+
+    if (isLessThanCurrentDate(deadline)) {
+      return next(new ApiError("Past Date is not allowed", 400));
+    }
+    objectToUpdate.deadline = deadline;
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(jobId)) {
+    return next(new ApiError("Invalid Job ID", 400));
+  }
+
+  const job = await Job.findById(jobId);
+  if (!job) {
+    return next(new ApiError("Job not found", 400));
+  }
+
+  const company = await Company.findById(job.company);
+
+  if (company.owner.toString() !== user._id.toString()) {
+    return next(new ApiError("You can't update this job", 400));
+  }
+
+  const updatedJob = await Job.findByIdAndUpdate(jobId, objectToUpdate, {
+    new: true
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Job Updated Successfully",
+    data: updatedJob,
+  });
+});
 
 // Deleting Existing Job
 export const deleteJob = asyncHandler(async (req, res, next) => {});
