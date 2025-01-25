@@ -7,6 +7,7 @@ import postRoter from "./routes/post.js";
 import messageRouter from "./routes/message.js";
 import communityRouter from "./routes/community.js";
 import companyRouter from "./routes/company.js";
+import jobRouter from "./routes/job.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import cookieParser from "cookie-parser";
 
@@ -30,6 +31,7 @@ app.use("/api/post", postRoter);
 app.use("/api/message", messageRouter);
 app.use("/api/community", communityRouter);
 app.use("/api/company", companyRouter);
+app.use("/api/job", jobRouter);
 
 //Error Handler
 app.use(errorMiddleware);

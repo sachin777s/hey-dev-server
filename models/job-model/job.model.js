@@ -37,7 +37,7 @@ const jobSchema = new Schema(
         return this.locationType !== "Remote";
       },
     },
-    organization: {
+    company: {
       type: Schema.Types.ObjectId,
       ref: "Organization",
       required: true,
@@ -53,14 +53,8 @@ const jobSchema = new Schema(
       min: 1,
     },
     deadline: {
-      type: Date,
+      type: String,
       required: true,
-      validate: {
-        validator: function (value) {
-          return value > new Date();
-        },
-        message: "Deadline must be a future date",
-      },
     },
     status: {
       type: String,
