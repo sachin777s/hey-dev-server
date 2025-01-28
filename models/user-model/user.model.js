@@ -15,6 +15,9 @@ import { experienceSchema } from "./sub-schemas/experience.schema.js";
 // Main User schema
 const userSchema = new Schema(
   {
+    clerkId: {
+      type: String,
+    },
     fullName: {
       type: String,
       required: [true, "Full name is required"],

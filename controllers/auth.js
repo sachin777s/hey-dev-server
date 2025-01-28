@@ -35,7 +35,9 @@ export const registerUser = asyncHandler(async (req, res, next) => {
 });
 
 //Login existing user
-export const loginUser = (req, res) => {};
+export const loginUser = asyncHandler(async (req, res) => {
+  const { email, username } = req.body;
+});
 
 //Logout user
 export const logoutUser = (req, res) => {};

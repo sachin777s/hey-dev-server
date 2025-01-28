@@ -10,6 +10,11 @@ import companyRouter from "./routes/company.js";
 import jobRouter from "./routes/job.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import bodyParser from "body-parser";
+import { Webhook } from "svix";
+import { clerkRegisterWebhook } from "./controllers/clerkWebhook.js";
+import clerkRouter from "./routes/clerkWebhook.js";
 
 //env confiuration
 env.config();
@@ -20,9 +25,13 @@ dbConfig();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+app.use(cors({ origin: "*" }));
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use("/api/webhook", clerkRouter);
 
 //Routers
 app.use("/api/auth", authRouter);
