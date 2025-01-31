@@ -11,10 +11,9 @@ import jobRouter from "./routes/job.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import bodyParser from "body-parser";
-import { Webhook } from "svix";
-import { clerkRegisterWebhook } from "./controllers/clerkWebhook.js";
 import clerkRouter from "./routes/clerkWebhook.js";
+import { clerkMiddleware } from "@clerk/express";
+import authProtection from "./routes/clerkAuthProtection.js";
 
 //env confiuration
 env.config();
@@ -23,14 +22,21 @@ env.config();
 dbConfig();
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT;
 
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "*", credentials: true }));
 
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Clerk middleware
+app.use(clerkMiddleware());
+
+// Clerk authenticate protection
+app.use("/api/auth-protection", authProtection);
+
+// Clerk webhook for register and update user
 app.use("/api/webhook", clerkRouter);
 
 //Routers
@@ -47,5 +53,5 @@ app.use(errorMiddleware);
 
 //Listening port
 app.listen(PORT, () => {
-  console.log(`Server is running on htttp://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
