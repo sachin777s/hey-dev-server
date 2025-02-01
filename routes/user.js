@@ -22,8 +22,8 @@ import { requireAuth } from "@clerk/express";
 const router = Router();
 
 // Getting single user
-router.all(
-  "/:userId",
+router.get(
+  "/profile",
   requireAuth({ signInUrl: "/api/auth-protection" }),
   authMiddleware,
   getUser

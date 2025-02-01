@@ -1,6 +1,6 @@
 import { clerkClient, getAuth } from "@clerk/express";
 import User from "../models/user-model/user.model.js";
-import ApiError from "../middlewares/errorMiddleware.js";
+import ApiError from "../utils/ApiError.js";
 
 const authMiddleware = async (req, res, next) => {
   try {

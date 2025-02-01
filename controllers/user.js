@@ -10,7 +10,8 @@ import Community from "../models/community-model/community.model.js";
 
 // Getting user
 export const getUser = asyncHandler(async (req, res, next) => {
-  const { userId } = req.params;
+  // const { userId } = req.params;
+  const userId = req.user._id;
   if (!userId) {
     return next(new ApiError("Missing userId", 400));
   }

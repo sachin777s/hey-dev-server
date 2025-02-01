@@ -3,6 +3,6 @@ import { clerkAuthProtection } from "../controllers/clerkAuthProtection.js";
 
 const router = Router();
 
-router.get("/", clerkAuthProtection);
+router.all("/", clerkAuthProtection);
 
 export default router;
