@@ -52,7 +52,7 @@ router.get(
 /***** Updating user informations *****/
 router.put("/", requireAuth(), authMiddleware, updateUser);
 router.put(
-  "/:userId/profile-picture",
+  "/profile/profile-picture",
   requireAuth(),
   authMiddleware,
   updateProfilePicture
