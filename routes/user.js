@@ -12,9 +12,9 @@ import {
   updateProfilePicture,
   updateProjects,
   updateSkills,
-  updateUser,
   updateWebsite,
   getUserCommunities,
+  updateAboutInformation,
 } from "../controllers/user.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { requireAuth } from "@clerk/express";
@@ -50,17 +50,17 @@ router.get(
 );
 
 /***** Updating user informations *****/
-router.put("/", requireAuth(), authMiddleware, updateUser);
+router.put("/profile/about-information", requireAuth(), authMiddleware, updateAboutInformation);
 router.put(
   "/profile/profile-picture",
   requireAuth(),
   authMiddleware,
   updateProfilePicture
 );
-router.put("/:userId/skills", requireAuth(), authMiddleware, updateSkills);
-router.put("/:userId/projects", requireAuth(), authMiddleware, updateProjects);
+router.put("/profile/skills", requireAuth(), authMiddleware, updateSkills);
+router.put("/profile/projects", requireAuth(), authMiddleware, updateProjects);
 router.put(
-  "/:userId/education",
+  "/profile/education",
   requireAuth(),
   authMiddleware,
   udpateEducation
@@ -78,12 +78,12 @@ router.put(
   udpateSocialLinks
 );
 router.put(
-  "/:userId/spoken-languages",
+  "/profile/spoken-languages",
   requireAuth(),
   authMiddleware,
   udpateSpokenLanguages
 );
-router.put("/:userId/website", requireAuth(), authMiddleware, updateWebsite);
-router.put("/:userId/resume", requireAuth(), authMiddleware, udpateResume);
+router.put("/profile/website", requireAuth(), authMiddleware, updateWebsite);
+router.put("/profile/resume", requireAuth(), authMiddleware, udpateResume);
 
 export default router;

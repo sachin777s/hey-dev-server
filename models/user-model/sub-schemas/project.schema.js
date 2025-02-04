@@ -3,6 +3,10 @@ import { URL_REGEX, VALIDATION_MESSAGES } from "../user.constants.js";
 
 export const projectSchema = new Schema(
   {
+    title: {
+      type: String,
+      maxlength: 50,
+    },
     gitUrl: {
       type: String,
       default: "",

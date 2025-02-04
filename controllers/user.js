@@ -134,16 +134,10 @@ export const getUserCommunities = asyncHandler(async (req, res, next) => {
 /********** Updating User Informations Routes ***********/
 
 //Update user
-export const updateUser = asyncHandler(async (req, res, next) => {
-  const { fullName, username, headline, about } = req.body;
-  const { _id } = req.user;
+export const updateAboutInformation = asyncHandler(async (req, res, next) => {
+  const { headline, about } = req.body;
+  const user = req.user;
   const objectToUpdate = {};
-
-  if (username) {
-    if (!USERNAME_REGEX.test(username))
-      return next(new ApiError("Invalid Username"));
-    objectToUpdate.username = username;
-  }
 
   if (headline !== null) {
     if (headline?.length > 100)
@@ -157,12 +151,8 @@ export const updateUser = asyncHandler(async (req, res, next) => {
     objectToUpdate.about = about;
   }
 
-  if (fullName) {
-    objectToUpdate.fullName = fullName;
-  }
-
   const updatedUser = await User.findByIdAndUpdate(
-    _id,
+    user._id,
     {
       ...objectToUpdate,
     },
@@ -190,7 +180,7 @@ export const updateProfilePicture = asyncHandler(async (req, res, next) => {
       return next(new ApiError("Invalid Profile Piture URL", 400));
     }
   }
-               
+
   const updatedUser = await User.findByIdAndUpdate(
     user._id,
     {
@@ -214,26 +204,24 @@ export const updateProfilePicture = asyncHandler(async (req, res, next) => {
 
 export const updateSkills = asyncHandler(async (req, res, next) => {
   const { skills } = req.body;
-  const { userId } = req.params;
   const user = req.user;
 
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return next(new ApiError("Invalid userID", 400));
-  }
-
-  if (userId !== user._id) {
-    return next(new ApiError("Can't Change Other's Information", 401));
+  if (!Array.isArray(skills)) {
+    return next(new ApiError("Invalid Skills Credetials", 400));
   }
 
   for (let i = 0; i < skills.length; i++) {
     if (typeof skills[i] !== "string") {
-      return next(new ApiError("Invalid Skills Credentials"));
+      return next(new ApiError("Invalid Skills Credentials", 400));
     }
-    skills[i] = skills[i].trim();
+    skills[i] = skills[i]
+      .split(" ")
+      .filter((word) => word !== "")
+      .join(" ");
   }
 
   const updatedUser = await User.findByIdAndUpdate(
-    userId,
+    user._id,
     {
       skills,
     },
@@ -254,22 +242,18 @@ export const updateSkills = asyncHandler(async (req, res, next) => {
 // Updating Projects
 export const updateProjects = asyncHandler(async (req, res, next) => {
   const { projects } = req.body;
-  const { userId } = req.params;
   const user = req.user;
 
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return next(new ApiError("Invalid userID", 400));
-  }
-
-  if (userId !== user._id) {
-    return next(new ApiError("Can't Change Other's Information", 401));
+  if (!Array.isArray(projects)) {
+    return next(new ApiError("Invalid Projects Credentials", 400));
   }
 
   for (let i = 0; i < projects.length; i++) {
     if (
       typeof projects[i] !== "object" ||
       !projects[i].gitUrl ||
-      !projects[i].hostUrl
+      !projects[i].hostUrl ||
+      !projects[i].title
     ) {
       return next(new ApiError("Invalid Projects Credentials", 401));
     }
@@ -283,7 +267,7 @@ export const updateProjects = asyncHandler(async (req, res, next) => {
   }
 
   const updatedUser = await User.findByIdAndUpdate(
-    userId,
+    user._id,
     {
       projects,
     },
@@ -304,16 +288,7 @@ export const updateProjects = asyncHandler(async (req, res, next) => {
 // Updating Education
 export const udpateEducation = asyncHandler(async (req, res, next) => {
   const { education } = req.body;
-  const { userId } = req.params;
   const user = req.user;
-
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return next(new ApiError("Invalid userID", 400));
-  }
-
-  if (userId !== user._id) {
-    return next(new ApiError("Can't Change Other's Information", 401));
-  }
 
   for (let i = 0; i < education.length; i++) {
     if (
@@ -328,7 +303,7 @@ export const udpateEducation = asyncHandler(async (req, res, next) => {
   }
 
   const updatedUser = await User.findByIdAndUpdate(
-    userId,
+    user._id,
     {
       education,
     },
@@ -400,16 +375,7 @@ export const updateExperience = asyncHandler(async (req, res, next) => {
 // Updating Social Media Links
 export const udpateSocialLinks = asyncHandler(async (req, res, next) => {
   const { socialLinks } = req.body;
-  const { userId } = req.params;
   const user = req.user;
-
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return next(new ApiError("Invalid userID", 400));
-  }
-
-  if (userId !== user._id) {
-    return next(new ApiError("Can't Change Other's Information", 401));
-  }
 
   if (!socialLinks) {
     return next(new ApiError("Missing Credentials", 400));
@@ -429,7 +395,7 @@ export const udpateSocialLinks = asyncHandler(async (req, res, next) => {
   }
 
   const updatedUser = await User.findByIdAndUpdate(
-    userId,
+    user._id,
     {
       socialLinks,
     },
@@ -450,16 +416,7 @@ export const udpateSocialLinks = asyncHandler(async (req, res, next) => {
 //Updating Spoken Languages
 export const udpateSpokenLanguages = asyncHandler(async (req, res, next) => {
   const { spokenLanguages } = req.body;
-  const { userId } = req.params;
   const user = req.user;
-
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return next(new ApiError("Invalid userID", 400));
-  }
-
-  if (userId !== user._id) {
-    return next(new ApiError("Can't Change Other's Information", 401));
-  }
 
   for (let i = 0; i < spokenLanguages.length; i++) {
     if (typeof spokenLanguages[i] !== "string") {
@@ -469,7 +426,7 @@ export const udpateSpokenLanguages = asyncHandler(async (req, res, next) => {
   }
 
   const updatedUser = await User.findByIdAndUpdate(
-    userId,
+    user._id,
     {
       spokenLanguages,
     },
@@ -490,23 +447,14 @@ export const udpateSpokenLanguages = asyncHandler(async (req, res, next) => {
 // Updating Website URL
 export const updateWebsite = asyncHandler(async (req, res, next) => {
   const { website } = req.body;
-  const { userId } = req.params;
   const user = req.user;
-
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return next(new ApiError("Invalid userID", 400));
-  }
-
-  if (userId !== user._id) {
-    return next(new ApiError("Can't Change Other's Information", 401));
-  }
 
   if (website && !URL_REGEX.test(website)) {
     return next(new ApiError("Invalid URL", 400));
   }
 
   const updatedUser = await User.findByIdAndUpdate(
-    userId,
+    user._id,
     {
       website,
     },
@@ -527,23 +475,14 @@ export const updateWebsite = asyncHandler(async (req, res, next) => {
 // Updating Resume
 export const udpateResume = asyncHandler(async (req, res, next) => {
   const { resume } = req.body;
-  const { userId } = req.params;
   const user = req.user;
-
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return next(new ApiError("Invalid userID", 400));
-  }
-
-  if (userId !== user._id) {
-    return next(new ApiError("Can't Change Other's Information", 401));
-  }
 
   if (resume && !URL_REGEX.test(resume)) {
     return next(new ApiError("Invalid Resume URL", 400));
   }
 
   const updatedUser = await User.findByIdAndUpdate(
-    userId,
+    user._id,
     {
       resume,
     },
