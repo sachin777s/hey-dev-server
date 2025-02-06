@@ -8,25 +8,26 @@ import {
   viewPost,
 } from "../controllers/post.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
+import { requireAuth } from "@clerk/express";
 
 const router = Router();
 
 // Creating New Post
-router.post("/", authMiddleware, createPost);
+router.post("/", requireAuth(), authMiddleware, createPost);
 
 // Updating Existing Post
-router.put("/:postId", authMiddleware, updatePost);
+router.put("/:postId", requireAuth(), authMiddleware, updatePost);
 
 // Deleting Existing Post
-router.delete("/:postId", authMiddleware, deletePost);
+router.delete("/:postId", requireAuth(), authMiddleware, deletePost);
 
 // Getting Posts
-router.get("/", authMiddleware, getPosts);
+router.get("/", requireAuth(), authMiddleware, getPosts);
 
 // Like the Post
-router.put("/:postId/like", authMiddleware, likePost);
+router.put("/:postId/like", requireAuth(), authMiddleware, likePost);
 
 // View the Post
-router.put("/:postId/view", authMiddleware, viewPost);
+router.put("/:postId/view", requireAuth(), authMiddleware, viewPost);
 
 export default router;
