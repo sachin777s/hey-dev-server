@@ -54,7 +54,7 @@ export const createPost = asyncHandler(async (req, res, next) => {
     community = null;
   }
 
-  await Post.create({
+  const post = await Post.create({
     user,
     heading,
     text,
@@ -64,9 +64,15 @@ export const createPost = asyncHandler(async (req, res, next) => {
     community,
   });
 
+  const populatedPost = await post.populate(
+    "user",
+    "username fullName profilePicture"
+  );
+
   res.status(201).json({
     success: true,
     message: "Post Created Successfully",
+    data: populatedPost,
   });
 });
 
@@ -143,6 +149,7 @@ const deletePostAndReplies = async (postId) => {
 
 export const deletePost = asyncHandler(async (req, res, next) => {
   const { postId } = req.params;
+  const userId = req.user._id;
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     return next(new ApiError("Invalid Post ID", 400));
@@ -151,6 +158,10 @@ export const deletePost = asyncHandler(async (req, res, next) => {
   const postExist = await Post.findById(postId);
   if (!postExist) {
     return next(new ApiError("Post not found", 400));
+  }
+
+  if (userId.toString() !== postExist.user.toString()) {
+    return next(new ApiError("You can't delete this post", 400));
   }
 
   await deletePostAndReplies(postId);
@@ -237,9 +248,7 @@ export const getPosts = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: {
-      posts,
-    },
+    data: posts,
   });
 });
 
@@ -265,15 +274,17 @@ export const likePost = asyncHandler(async (req, res, next) => {
 
   const updatedPost = await Post.findByIdAndUpdate(
     postId,
-    isLiked ? { $pull: { likes: userId } } : { $addToSet: { likes: userId } },
+    isLiked
+      ? { $pull: { likes: userId }, $inc: { likesCount: -1 } }
+      : { $addToSet: { likes: userId }, $inc: { likesCount: 1 } },
     { new: true }
-  );
+  ).populate("user", "fullName username profilePicture");
 
   res.status(200).json({
     message: isLiked ? "Post Unliked Successfully" : "Post Liked Successfully",
     data: {
       likesCount: updatedPost.likes.length,
-      likes: updatedPost.likes,
+      post: updatedPost,
     },
   });
 });
