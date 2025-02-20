@@ -43,7 +43,7 @@ router.get("/followings/get", requireAuth(), authMiddleware, getFollowings);
 
 // Getting user's comunities
 router.get(
-  "/:userId/communities",
+  "/profile/communities",
   requireAuth(),
   authMiddleware,
   getUserCommunities

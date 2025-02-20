@@ -111,11 +111,7 @@ export const getFollowings = asyncHandler(async (req, res, next) => {
 
 // Getting user's communities
 export const getUserCommunities = asyncHandler(async (req, res, next) => {
-  const { userId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return next(new ApiError("Invalid userId", 400));
-  }
+  const userId = req.user._id;
 
   const ownedCommunities = await Community.find({ creator: userId }).select(
     "name logo memberCount"

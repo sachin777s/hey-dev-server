@@ -70,7 +70,10 @@ export const gettCommunity = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Invalid communityId params", 400));
   }
 
-  const community = await Community.findById(communityId);
+  const community = await Community.findById(communityId).populate([
+    { path: "creator", select: "username fullName profilePicture" },
+    { path: "members", select: "profilePicture" },
+  ]);
 
   if (!community) {
     return next(new ApiError("Community Not Found", 400));
@@ -86,9 +89,20 @@ export const gettCommunity = asyncHandler(async (req, res, next) => {
 export const updateCommunity = asyncHandler(async (req, res, next) => {
   const { name, headline, description, logo, rules } = req.body;
   const { communityId } = req.params;
+  const userId = req.user._id;
+
   const objectToUpdate = {};
   if (!name && !headline && !description && !logo && !rules) {
     return next(new ApiError("Atleast one field is required to update", 400));
+  }
+
+  const community = await Community.findById(communityId);
+  if (!community) {
+    return next(new ApiError("Community not found", 400));
+  }
+
+  if (community.creator.toString() !== userId.toString()) {
+    return next(new ApiError("Only owner can edit community details", 400));
   }
 
   if (name) {
@@ -128,6 +142,14 @@ export const updateCommunity = asyncHandler(async (req, res, next) => {
     objectToUpdate.logo = logo;
   }
 
+  if (rules) {
+    let doesContainStrings = rules.every((rule) => typeof rule === "string");
+    if (!Array.isArray(rules) || !doesContainStrings) {
+      return next(new ApiError("Invalid"));
+    }
+    objectToUpdate.rules = rules;
+  }
+
   const updatedCommunity = await Community.findByIdAndUpdate(
     communityId,
     objectToUpdate,
@@ -147,11 +169,22 @@ export const updateCommunity = asyncHandler(async (req, res, next) => {
 // Deleting Existing Community
 export const deleteCommunity = asyncHandler(async (req, res, next) => {
   const { communityId } = req.params;
+  const userId = req.user._id;
+
   if (!mongoose.Types.ObjectId.isValid(communityId)) {
     return next(new ApiError("Invalid communityId params", 400));
   }
 
-  const community = await Community.findByIdAndDelete(communityId);
+  const community = await Community.findById(communityId);
+  if (!community) {
+    return next(new ApiError("Community not found", 400));
+  }
+
+  if (community.creator.toString() !== userId.toString()) {
+    return next(new ApiError("Only owner can delete community details", 400));
+  }
+
+  await Community.findByIdAndDelete(communityId);
 
   if (!community) {
     return next(new ApiError("Community not found", 400));
@@ -199,26 +232,46 @@ export const joinAndLeftCommunity = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Community not found", 400));
   }
 
+  if (community.creator.toString() === user._id) {
+    return next(new ApiError("You are owner of this community", 400));
+  }
+
   const isJoined = community.members.includes(user._id);
 
   let responseMessage = "";
+  let updatedCommunity;
   if (isJoined) {
-    await Community.findByIdAndUpdate(communityId, {
-      $pull: { members: user._id },
-      $inc: { memberCount: -1 },
-    });
+    updatedCommunity = await Community.findByIdAndUpdate(
+      communityId,
+      {
+        $pull: { members: user._id },
+        $inc: { memberCount: -1 },
+      },
+      { new: true }
+    ).populate([
+      { path: "creator", select: "username fullName profilePicture" },
+      { path: "members", select: "profilePicture" },
+    ]);
     responseMessage = "Lefted Community Successfully";
   } else {
-    await Community.findByIdAndUpdate(communityId, {
-      $addToSet: { members: user._id },
-      $inc: { memberCount: 1 },
-    });
+    updatedCommunity = await Community.findByIdAndUpdate(
+      communityId,
+      {
+        $addToSet: { members: user._id },
+        $inc: { memberCount: 1 },
+      },
+      { new: true }
+    ).populate([
+      { path: "creator", select: "username fullName profilePicture" },
+      { path: "members", select: "profilePicture" },
+    ]);
     responseMessage = "Joined Community Successfully";
   }
 
   res.status(200).json({
     success: true,
     message: responseMessage,
+    data: updatedCommunity,
   });
 });
 
