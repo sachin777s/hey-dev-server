@@ -3,6 +3,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { EMAIL_REGEX, URL_REGEX } from "../models/user-model/user.constants.js";
 import Company from "../models/company-model/company.model.js";
 import mongoose from "mongoose";
+import Job from "../models/job-model/job.model.js";
 
 // Creating New Company
 export const createCompany = asyncHandler(async (req, res, next) => {
@@ -74,7 +75,7 @@ export const createCompany = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Phone Number length should be minimum 10", 400));
   }
 
-  await Company.create({
+  const createdCompany = await Company.create({
     name,
     headline,
     description,
@@ -91,6 +92,7 @@ export const createCompany = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     success: true,
     message: "Company Page Created Successfully",
+    data: createdCompany,
   });
 });
 
@@ -136,7 +138,7 @@ export const updateCompany = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Company not found", 400));
   }
 
-  if (company.owner.toString() !== user._id) {
+  if (company.owner.toString() !== user._id.toString()) {
     return next(new ApiError("You can't update this compay detail", 400));
   }
 
@@ -230,6 +232,7 @@ export const updateCompany = asyncHandler(async (req, res, next) => {
   });
 });
 
+// Deleting Existing Company
 export const deleteCompany = asyncHandler(async (req, res, next) => {
   const user = req.user;
   const { companyId } = req.params;
@@ -255,25 +258,37 @@ export const deleteCompany = asyncHandler(async (req, res, next) => {
   });
 });
 
+// Getting Single Company
 export const getSingleCompany = asyncHandler(async (req, res, next) => {
   const user = req.user;
-  const { companyId } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(companyId)) {
-    return next(new ApiError("Invalid Community ID", 400));
-  }
-
-  const company = await Company.findById(companyId);
+  const company = await Company.findOne({ owner: user._id });
   if (!company) {
-    return next(new ApiError("Company not found", 400));
-  }
-
-  if (company.owner.toString() !== user._id) {
-    return next(new ApiError("You are not owner of this company", 400));
+    return next(new ApiError("No Company Available", 400));
   }
 
   res.status(200).json({
     success: true,
     data: company,
+  });
+});
+
+// Getting Company Jobs
+export const companyJobs = asyncHandler(async (req, res, next) => {
+  const user = req.user;
+
+  const company = await Company.findOne({ owner: user._id });
+  if (!company) {
+    return next(new ApiError("No Company Available", 400));
+  }
+
+  const jobs = await Job.find({ company: company.id }).populate(
+    "applicants",
+    "username fullName profilePicture resume email"
+  );
+
+  res.status(200).json({
+    success: true,
+    data: jobs,
   });
 });

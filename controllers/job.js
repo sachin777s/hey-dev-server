@@ -4,7 +4,6 @@ import Company from "../models/company-model/company.model.js";
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { DATE_REGEX, isLessThanCurrentDate } from "../utils/contants.js";
-import { query } from "express";
 import User from "../models/user-model/user.model.js";
 
 // Creating New Job
@@ -111,7 +110,7 @@ export const createJob = asyncHandler(async (req, res, next) => {
     return next(new ApiError("You can't create job on this company page", 400));
   }
 
-  await Job.create({
+  const createdJob = await Job.create({
     role,
     description,
     skills,
@@ -127,6 +126,7 @@ export const createJob = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     success: true,
     message: "Job is created",
+    data: createdJob,
   });
 });
 
@@ -315,7 +315,10 @@ export const getSingleJob = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Invalid Job ID", 400));
   }
 
-  const job = await Job.findById(jobId);
+  const job = await Job.findById(jobId).populate(
+    "company",
+    "name logo description"
+  );
   if (!job) {
     return next(new ApiError("Job not found", 400));
   }
@@ -335,6 +338,7 @@ export const getMultipleJob = asyncHandler(async (req, res, next) => {
     experience,
     location,
     locationType,
+    company,
   } = req.query;
   const pageNum = parseInt(page, 10);
   const pageLimit = parseInt(limit, 10);
@@ -356,10 +360,10 @@ export const getMultipleJob = asyncHandler(async (req, res, next) => {
   }
 
   if (parseInt(experience) >= 0) {
-    if (parseInt(experience) > 6) {
-      query.experienceInYear = { $gt: parseInt(experience) };
+    if (parseInt(experience) >= 6) {
+      query.experienceInYear = { $gte: parseInt(experience) };
     } else {
-      query.experienceInYear = parseInt(experience);
+      query.experienceInYear = { $lte: parseInt(experience) };
     }
   }
 
@@ -371,7 +375,12 @@ export const getMultipleJob = asyncHandler(async (req, res, next) => {
     query.locationType = locationType;
   }
 
+  if (company) {
+    query = { ...query, company };
+  }
+
   const jobs = await Job.find(query)
+    .populate("company", "name")
     .skip(skip)
     .limit(parseInt(limit))
     .sort({ createdAt: -1 });
@@ -401,11 +410,18 @@ export const applyInJob = asyncHandler(async (req, res, next) => {
     );
   }
 
-  await Job.findByIdAndUpdate(jobId, { $addToSet: { applicants: user._id } });
+  const updatedJob = await Job.findByIdAndUpdate(
+    jobId,
+    {
+      $addToSet: { applicants: user._id },
+    },
+    { new: true }
+  ).populate("company", "name logo description");
 
   res.status(200).json({
     success: true,
     message: "Applied Successfully",
+    data: updatedJob,
   });
 });
 

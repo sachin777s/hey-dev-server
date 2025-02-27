@@ -4,6 +4,7 @@ import {
   updateCompany,
   deleteCompany,
   getSingleCompany,
+  companyJobs,
 } from "../controllers/company.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -18,5 +19,10 @@ router.put("/:companyId", authMiddleware, updateCompany);
 // Deleting Existing Company
 router.delete("/:companyId", authMiddleware, deleteCompany);
 
-router.get("/:companyId", authMiddleware, getSingleCompany);
+// Getting Single Company
+router.get("/", authMiddleware, getSingleCompany);
+
+// Getting Company Jobs
+router.get("/jobs", authMiddleware, companyJobs);
+
 export default router;
