@@ -172,6 +172,25 @@ export const deletePost = asyncHandler(async (req, res, next) => {
   });
 });
 
+// Getting Single Post
+export const getSinglePost = asyncHandler(async (req, res, next) => {
+  const { postId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    return next(new ApiError("Invalid Post ID", 400));
+  }
+
+  const post = await Post.findById(postId);
+  if (!post) {
+    return next(new ApiError("Post Not Found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    data: post,
+  });
+});
+
+// Getting Multiple Posts
 export const getPosts = asyncHandler(async (req, res, next) => {
   const {
     page = 1,

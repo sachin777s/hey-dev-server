@@ -6,6 +6,7 @@ import {
   likePost,
   updatePost,
   viewPost,
+  getSinglePost,
 } from "../controllers/post.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { requireAuth } from "@clerk/express";
@@ -20,6 +21,9 @@ router.put("/:postId", requireAuth(), authMiddleware, updatePost);
 
 // Deleting Existing Post
 router.delete("/:postId", requireAuth(), authMiddleware, deletePost);
+
+// Getting Single Post
+router.get("/:postId", requireAuth(), authMiddleware, getSinglePost);
 
 // Getting Posts
 router.get("/", requireAuth(), authMiddleware, getPosts);
