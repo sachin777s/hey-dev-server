@@ -14,6 +14,7 @@ import cors from "cors";
 import clerkRouter from "./routes/clerkWebhook.js";
 import { clerkMiddleware } from "@clerk/express";
 import authProtection from "./routes/clerkAuthProtection.js";
+import { Server } from "socket.io";
 
 //env confiuration
 env.config();
@@ -22,7 +23,7 @@ env.config();
 dbConfig();
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8080;
 
 app.use(cors({ origin: "*", credentials: true }));
 
@@ -52,6 +53,46 @@ app.use("/api/job", jobRouter);
 app.use(errorMiddleware);
 
 //Listening port
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  },
+  maxHttpBufferSize: 10 * 1024 * 1024, // 10 MB
+});
+
+global.onlineUsers = new Map();
+io.on("connection", (socket) => {
+  console.log("New Connection");
+  global.chatSocket = socket;
+  socket.on("add-user", (userId) => {
+    console.log(userId);
+    onlineUsers.set(userId, socket.id);
+  });
+
+  socket.on("send-msg", (data) => {
+    const sendUserSocket = onlineUsers.get(data.reciever);
+    if (sendUserSocket) {
+      io.to(sendUserSocket).emit("msg-recieve", data);
+    }
+  });
+
+  // Handle typing event
+  socket.on("typing", ({ sender, receiver }) => {
+    const receiverSocket = onlineUsers.get(receiver);
+    if (receiverSocket) {
+      socket.to(receiverSocket).emit("user-typing", sender);
+    }
+  });
+
+  socket.on("stop-typing", ({ sender, receiver }) => {
+    const receiverSocket = onlineUsers.get(receiver);
+    if (receiverSocket) {
+      socket.to(receiverSocket).emit("user-stopped-typing", sender);
+    }
+  });
 });

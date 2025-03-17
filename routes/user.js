@@ -23,7 +23,7 @@ const router = Router();
 
 // Getting single user
 router.get(
-  "/profile",
+  "/profile/:username",
   requireAuth({ signInUrl: "/api/auth-protection" }),
   authMiddleware,
   getUser

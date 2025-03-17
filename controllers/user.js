@@ -10,17 +10,15 @@ import Community from "../models/community-model/community.model.js";
 
 // Getting user
 export const getUser = asyncHandler(async (req, res, next) => {
-  // const { userId } = req.params;
-  const userId = req.user._id;
-  if (!userId) {
-    return next(new ApiError("Missing userId", 400));
+  const { username } = req.params;
+  if (!username) {
+    return next(new ApiError("Missing username", 400));
   }
 
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return next(new ApiError("Invalid userID", 400));
+  const user = await User.findOne({username});
+  if (!user) {
+    return next(new ApiError("User not found", 400));
   }
-
-  const user = await User.findById(userId);
 
   res.status(200).json({
     message: "success",

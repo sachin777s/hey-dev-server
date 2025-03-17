@@ -27,7 +27,7 @@ export const createMessage = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Reciever doesn't exist", 400));
   }
 
-  await Message.create({
+  const message = await Message.create({
     sender: user._id,
     reciever,
     text,
@@ -37,15 +37,20 @@ export const createMessage = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Message Created Successfully",
+    data: message,
   });
 });
 
 // Getting Messages
 export const gettingMessages = asyncHandler(async (req, res, next) => {
   const user = req.user;
+  const { messageUserId } = req.params;
 
   const messages = await Message.find({
-    $or: [{ reciever: user._id }, { sender: user._id }],
+    $or: [
+      { reciever: user._id, sender: messageUserId },
+      { sender: user._id, reciever: messageUserId },
+    ],
   });
 
   res.status(200).json({
@@ -145,5 +150,33 @@ export const clearChat = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Chats Erased successfully",
+  });
+});
+
+export const messageUsers = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const messages = await Message.find({
+    $or: [{ sender: userId }, { reciever: userId }],
+  }).select("sender reciever");
+
+  // Extract unique user IDs
+  const userIds = new Set();
+  messages.forEach((msg) => {
+    if (msg.sender.toString() !== userId.toString()) {
+      userIds.add(msg.sender);
+    }
+    if (msg.reciever.toString() !== userId.toString()) {
+      userIds.add(msg.reciever);
+    }
+  });
+
+  const users = await User.find({ _id: { $in: Array.from(userIds) } }).select(
+    "fullName username profilePicture"
+  );
+
+  res.status(200).json({
+    success: true,
+    data: users,
   });
 });
